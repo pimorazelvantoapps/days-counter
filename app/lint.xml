@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Versionsupdates sind bewusste Entscheidungen; ein neues Release darf den Build nicht brechen -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <!-- Privates Sideload-App ohne Cloud-Backup; android:dataExtractionRules ist für diesen Anwendungsfall kein Mehrwert -->
+    <issue id="DataExtractionRules" severity="ignore" />
+    <!-- Sideload-App ohne Play Store Icon-Pipeline; ein Monochrome-Layer bringt hier keinen praktischen Nutzen -->
+    <issue id="MonochromeLauncherIcon" severity="ignore" />
+</lint>
