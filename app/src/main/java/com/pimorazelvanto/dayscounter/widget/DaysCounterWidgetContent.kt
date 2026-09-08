@@ -1,6 +1,5 @@
 package com.pimorazelvanto.dayscounter.widget
 
-import androidx.annotation.ColorRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
@@ -11,6 +10,7 @@ import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
+import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -37,10 +37,23 @@ private val VALUE_TEXT_SIZE_SMALL = 13.sp
 private val CONTENT_PADDING = 4.dp
 private val HEADER_HEIGHT = 18.dp
 
-// FunctionNaming: Compose mandates PascalCase for composables.
-// ModifierMissing: the widget content always fills its host cell; a caller-supplied
-// GlanceModifier would have nothing meaningful to change.
-@Suppress("FunctionNaming", "ModifierMissing")
+// These are literals rather than colour resources because Glance restricts its @ColorRes
+// ColorProvider: a widget is rendered by the launcher process, which may resolve a resource
+// against its own configuration instead of ours and would get night mode silently wrong.
+// The day/night factory below resolves inside Glance itself.
+// KEEP IN SYNC WITH res/layout/widget_preview.xml, which paints the same palette as
+// @color/widget_header_text and @color/widget_sheet_text for the launcher preview.
+private val HEADER_TEXT_COLOR = ColorProvider(Color.White)
+
+@Suppress("MagicNumber") // ARGB literals are the palette itself, not values to name.
+private val SHEET_TEXT_COLOR = ColorProvider(day = Color(0xFF212121), night = Color(0xFFF5F5F5))
+
+@Suppress("MagicNumber") // ARGB literals are the palette itself, not values to name.
+private val PLACEHOLDER_TEXT_COLOR = ColorProvider(day = Color(0xFF9E9E9E), night = Color(0xFF757575))
+
+// The widget content always fills its host cell; a caller-supplied GlanceModifier
+// would have nothing meaningful to change.
+@Suppress("ModifierMissing")
 @Composable
 fun DaysCounterWidgetContent(
     state: WidgetUiState,
@@ -60,7 +73,6 @@ fun DaysCounterWidgetContent(
     }
 }
 
-@Suppress("FunctionNaming") // Compose mandates PascalCase for composables.
 @Composable
 private fun Header(state: WidgetUiState) {
     Box(
@@ -78,7 +90,7 @@ private fun Header(state: WidgetUiState) {
             modifier = GlanceModifier.semantics { testTag = "title" },
             style =
                 TextStyle(
-                    color = colorResource(R.color.widget_header_text),
+                    color = HEADER_TEXT_COLOR,
                     fontSize = TITLE_TEXT_SIZE,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
@@ -87,10 +99,9 @@ private fun Header(state: WidgetUiState) {
     }
 }
 
-@Suppress("FunctionNaming") // Compose mandates PascalCase for composables.
 @Composable
 private fun ColumnScope.Sheet(state: WidgetUiState) {
-    val textColor = if (state.isPlaceholder) R.color.widget_placeholder_text else R.color.widget_sheet_text
+    val textColor = if (state.isPlaceholder) PLACEHOLDER_TEXT_COLOR else SHEET_TEXT_COLOR
     Box(
         modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
         contentAlignment = Alignment.Center,
@@ -101,7 +112,7 @@ private fun ColumnScope.Sheet(state: WidgetUiState) {
             modifier = GlanceModifier.semantics { testTag = "value" },
             style =
                 TextStyle(
-                    color = colorResource(textColor),
+                    color = textColor,
                     fontSize = state.sizeTier.textSize(),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -109,15 +120,6 @@ private fun ColumnScope.Sheet(state: WidgetUiState) {
         )
     }
 }
-
-// Glance 1.2.0 marks the @ColorRes ColorProvider factory @RestrictTo(LIBRARY_GROUP), even though the
-// public background(@ColorRes Int) overload builds the very same ResourceColorProvider. Routing the
-// resource colours through one helper keeps widget and XML preview on a single palette that
-// values-night can override, and confines the suppression to a single line.
-@Suppress("RestrictedApi")
-private fun colorResource(
-    @ColorRes resId: Int,
-): ColorProvider = ColorProvider(resId)
 
 private fun DigitSizeTier.textSize(): TextUnit =
     when (this) {

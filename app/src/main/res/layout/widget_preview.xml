@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Overdraw: this layout is only ever inflated as an app-widget preview, never under an
+<!-- Static launcher preview for a widget that has never been placed; it mirrors
+     DaysCounterWidgetContent.kt, whose text colours are Kotlin literals because Glance
+     restricts resource colours. KEEP @color/widget_header_text and @color/widget_sheet_text
+     IN SYNC WITH HEADER_TEXT_COLOR and SHEET_TEXT_COLOR there.
+
+     Overdraw: this layout is only ever inflated as an app-widget preview, never under an
      activity theme, so the theme background lint infers is never actually painted. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
