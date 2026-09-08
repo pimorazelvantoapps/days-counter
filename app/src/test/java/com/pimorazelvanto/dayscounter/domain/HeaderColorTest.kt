@@ -49,4 +49,28 @@ class HeaderColorTest {
     fun `unknown name yields null instead of throwing`() {
         assertNull(HeaderColor.fromName("MAUVE"))
     }
+
+    @ParameterizedTest
+    @EnumSource(HeaderColor::class)
+    fun `white title text is legible against every header color`(color: HeaderColor) {
+        val ratio = whiteTextContrastRatio(color.argb)
+        assertTrue(
+            ratio >= WCAG_AA_NORMAL_TEXT_CONTRAST_RATIO,
+            "contrast ratio of ${color.name} is $ratio, must be at least $WCAG_AA_NORMAL_TEXT_CONTRAST_RATIO",
+        )
+    }
 }
+
+private const val WCAG_AA_NORMAL_TEXT_CONTRAST_RATIO = 4.5
+
+private fun whiteTextContrastRatio(argb: Long): Double {
+    val red = (argb shr 16 and 0xFF) / 255.0
+    val green = (argb shr 8 and 0xFF) / 255.0
+    val blue = (argb and 0xFF) / 255.0
+    val luminance =
+        0.2126 * linearize(red) + 0.7152 * linearize(green) + 0.0722 * linearize(blue)
+    return 1.05 / (luminance + 0.05)
+}
+
+private fun linearize(channel: Double): Double =
+    if (channel <= 0.03928) channel / 12.92 else Math.pow((channel + 0.055) / 1.055, 2.4)
