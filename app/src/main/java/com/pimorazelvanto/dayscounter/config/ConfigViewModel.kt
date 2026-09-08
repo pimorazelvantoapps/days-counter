@@ -58,10 +58,11 @@ class ConfigViewModel(
 
     fun save() {
         val state = uiState.value
+        if (state.saveState == SaveState.Saving) return
         val targetDate = state.targetDate
         if (!state.isValid || targetDate == null) return
+        mutableUiState.update { it.copy(saveState = SaveState.Saving) }
         viewModelScope.launch {
-            mutableUiState.update { it.copy(saveState = SaveState.Saving) }
             val result = persist(WidgetConfig(state.effectiveTitle, targetDate, state.color))
             mutableUiState.update { it.copy(saveState = result) }
         }

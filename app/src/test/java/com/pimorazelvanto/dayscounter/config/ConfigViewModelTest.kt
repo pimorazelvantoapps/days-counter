@@ -8,6 +8,7 @@ import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetUpdater
 import com.pimorazelvanto.dayscounter.testsupport.FixedClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -106,6 +107,7 @@ class ConfigViewModelTest {
 
         assertTrue(repository.saved.isEmpty())
         assertEquals(0, widgetUpdater.updateCount)
+        assertEquals(0, scheduler.scheduleCount)
         assertEquals(SaveState.Idle, vm.uiState.value.saveState)
     }
 
@@ -117,9 +119,29 @@ class ConfigViewModelTest {
 
         vm.save()
         assertEquals(SaveState.Failed, vm.uiState.value.saveState)
+        assertEquals(0, widgetUpdater.updateCount)
+        assertEquals(0, scheduler.scheduleCount)
 
         vm.onSaveFailureShown()
         assertEquals(SaveState.Idle, vm.uiState.value.saveState)
+    }
+
+    @Test
+    fun `second save while one is already in flight is ignored`() {
+        // A StandardTestDispatcher defers the launched coroutine instead of running it eagerly,
+        // so the second save() call genuinely observes saveState still at Saving.
+        val dispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(dispatcher)
+        val vm = viewModel()
+        vm.onTargetDateChanged(today.plusDays(5))
+
+        vm.save()
+        vm.save()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, widgetUpdater.updateCount)
+        assertEquals(1, scheduler.scheduleCount)
+        assertEquals(SaveState.Saved, vm.uiState.value.saveState)
     }
 
     @Test
