@@ -27,6 +27,8 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   `domain`; `widget` und `config` kennen `domain` und `data`, aber nicht einander.
 - Zeit nie direkt über `LocalDate.now()` lesen, immer über die `Clock`-Schnittstelle.
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
+- Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
+  tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.
 
 ## Dokumentation
 
