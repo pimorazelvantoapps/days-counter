@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- `minSdk = 33`, `compileSdk = 36`, `targetSdk = 36`. Package `com.pimorazelvanto.dayscounter`.
+- `minSdk = 33`, `compileSdk = 37`, `targetSdk = 37`. Package `com.pimorazelvanto.dayscounter`. (compileSdk 37 statt der ursprünglich geplanten 36: Compose BOM 2026.08.00 verlangt es, siehe Ruling 6.)
 - Kotlin Official Code Style (`kotlin.code.style=official`, ktlint `ktlint_official`). `allWarningsAsErrors = true` im Kotlin-Compiler. Lint: `warningsAsErrors = true`, `abortOnError = true`. detekt: Standardkonfiguration plus Compose-Regeln, leere Baseline, keine aufgeweichten Schwellwerte.
 - `domain` hat keine Android-Abhängigkeit. Zeit ausschließlich über `Clock`, niemals `LocalDate.now()` außerhalb von `SystemClock`.
 - Kein DI-Framework, kein Multi-Modul, kein WorkManager, kein `updatePeriodMillis`, kein Launcher-Eintrag.
