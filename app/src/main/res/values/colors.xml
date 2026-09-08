@@ -5,4 +5,7 @@
     <color name="widget_sheet_text">#212121</color>
     <color name="widget_header_text">#FFFFFF</color>
     <color name="widget_preview_header">#D32F2F</color>
+    <!-- Mirrors PLACEHOLDER_TEXT_COLOR in widget/DaysCounterWidgetContent.kt, which cannot
+         read a colour resource; see the note there. -->
+    <color name="widget_placeholder_text">#9E9E9E</color>
 </resources>

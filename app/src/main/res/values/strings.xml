@@ -5,4 +5,30 @@
     <string name="default_title">days</string>
     <!-- A bare numeral standing in for a day count in the launcher preview. -->
     <string name="widget_preview_value" translatable="false">42</string>
+    <string name="config_screen_title">Set up widget</string>
+    <string name="config_label_title">Title</string>
+    <string name="config_label_target_date">Target date</string>
+    <string name="config_label_color">Color</string>
+    <string name="config_pick_date">Pick a date</string>
+    <string name="config_title_length">%1$d/%2$d</string>
+    <string name="config_error_date_not_in_future">The date must be in the future</string>
+    <string name="config_choose_color">Choose a color</string>
+    <string name="config_action_cancel">Cancel</string>
+    <string name="config_action_save">Save</string>
+    <string name="config_action_ok">OK</string>
+    <string name="config_save_failed">Saving failed. Please try again.</string>
+    <string name="config_preview_description">Widget preview</string>
+    <string name="config_color_description">Color %1$s</string>
+    <string name="color_name_red">Red</string>
+    <string name="color_name_orange">Orange</string>
+    <string name="color_name_yellow">Yellow</string>
+    <string name="color_name_green">Green</string>
+    <string name="color_name_teal">Teal</string>
+    <string name="color_name_blue">Blue</string>
+    <string name="color_name_indigo">Indigo</string>
+    <string name="color_name_purple">Purple</string>
+    <string name="color_name_pink">Pink</string>
+    <string name="color_name_brown">Brown</string>
+    <string name="color_name_grey">Grey</string>
+    <string name="color_name_black">Black</string>
 </resources>

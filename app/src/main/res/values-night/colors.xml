@@ -2,4 +2,5 @@
 <resources>
     <color name="widget_sheet_background">#2B2B2B</color>
     <color name="widget_sheet_text">#F5F5F5</color>
+    <color name="widget_placeholder_text">#757575</color>
 </resources>
