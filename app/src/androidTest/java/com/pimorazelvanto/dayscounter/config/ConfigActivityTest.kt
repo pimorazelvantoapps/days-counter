@@ -8,6 +8,8 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -22,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.pimorazelvanto.dayscounter.AppContainer
 import com.pimorazelvanto.dayscounter.DaysCounterApplication
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
@@ -29,6 +32,7 @@ import com.pimorazelvanto.dayscounter.domain.WidgetConfig
 import com.pimorazelvanto.dayscounter.testsupport.FakeAppContainer
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
 import com.pimorazelvanto.dayscounter.testsupport.FixedClock
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -45,17 +49,33 @@ class ConfigActivityTest {
     private val today = LocalDate.now()
     private val tomorrow = today.plusDays(1)
     private val repository = FakeWidgetConfigRepository()
+    private val scenarios = mutableListOf<ActivityScenario<ConfigActivity>>()
     private lateinit var context: Context
+    private lateinit var applicationContainer: AppContainer
 
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        (context as DaysCounterApplication).container =
-            FakeAppContainer(clock = FixedClock(today), repository = repository)
+        val application = context as DaysCounterApplication
+        applicationContainer = application.container
+        application.container = FakeAppContainer(clock = FixedClock(today), repository = repository)
+    }
+
+    /**
+     * The container is process-global, so leaving the fake in place would leak this run's frozen
+     * date into any instrumentation class that follows.
+     */
+    @After
+    fun tearDown() {
+        scenarios.forEach { it.close() }
+        (context as DaysCounterApplication).container = applicationContainer
     }
 
     private fun launch(appWidgetId: Int = 42): ActivityScenario<ConfigActivity> =
-        ActivityScenario.launchActivityForResult(ConfigActivity.createIntent(context, appWidgetId))
+        launchWith(ConfigActivity.createIntent(context, appWidgetId))
+
+    private fun launchWith(intent: Intent): ActivityScenario<ConfigActivity> =
+        ActivityScenario.launchActivityForResult<ConfigActivity>(intent).also { scenarios += it }
 
     private fun string(
         resId: Int,
@@ -67,11 +87,18 @@ class ConfigActivityTest {
      * its first enabled day cell is tomorrow. A day cell carries the full localized date as its
      * semantics text rather than the bare day number, which is why it is addressed by that
      * position instead of by text; that the picked day really is tomorrow is asserted by the
-     * caller through the saved configuration.
+     * caller through the saved configuration. The expected count pins the match to the day cells
+     * of the displayed month, so a stray selectable node elsewhere on screen fails the test
+     * instead of being clicked.
      */
     private fun pickTomorrow() {
+        val selectableDaysOfDisplayedMonth = tomorrow.lengthOfMonth() - tomorrow.dayOfMonth + 1
         composeRule.onNodeWithTag(ConfigTestTags.DATE_FIELD).performClick()
-        composeRule.onAllNodes(isSelectable() and isEnabled()).onFirst().performClick()
+        composeRule
+            .onAllNodes(isSelectable() and isEnabled())
+            .assertCountEquals(selectableDaysOfDisplayedMonth)
+            .onFirst()
+            .performClick()
         composeRule.onNodeWithText(string(R.string.config_action_ok)).performClick()
     }
 
@@ -116,6 +143,9 @@ class ConfigActivityTest {
         launch()
 
         composeRule.onNodeWithTag(ConfigTestTags.COLOR_FIELD).performClick()
+        composeRule
+            .onAllNodes(isSelectable() and hasAnyAncestor(hasTestTag(ConfigTestTags.COLOR_GRID)))
+            .assertCountEquals(12)
         HeaderColor.entries.forEach { composeRule.onNodeWithTag(ConfigTestTags.colorOption(it)).assertIsDisplayed() }
         composeRule.onNodeWithTag(ConfigTestTags.colorOption(HeaderColor.TEAL)).performClick()
 
@@ -136,8 +166,7 @@ class ConfigActivityTest {
 
     @Test
     fun missingWidgetIdFinishesWithCanceled() {
-        val scenario =
-            ActivityScenario.launchActivityForResult<ConfigActivity>(Intent(context, ConfigActivity::class.java))
+        val scenario = launchWith(Intent(context, ConfigActivity::class.java))
 
         composeRule.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
         assertEquals(Activity.RESULT_CANCELED, scenario.result.resultCode)
