@@ -1,6 +1,6 @@
 package com.pimorazelvanto.dayscounter.testsupport
 
-import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
+import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 
 class FakeMidnightUpdateScheduler : MidnightUpdateScheduler {
     var scheduleCount = 0

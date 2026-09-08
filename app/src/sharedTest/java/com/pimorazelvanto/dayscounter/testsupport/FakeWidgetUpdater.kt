@@ -1,6 +1,6 @@
 package com.pimorazelvanto.dayscounter.testsupport
 
-import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
+import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 
 class FakeWidgetUpdater : WidgetUpdater {
     var updateCount = 0

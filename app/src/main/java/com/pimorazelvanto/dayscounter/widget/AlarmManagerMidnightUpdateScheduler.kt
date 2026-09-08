@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.pimorazelvanto.dayscounter.domain.Clock
+import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 
 class AlarmManagerMidnightUpdateScheduler(
     private val context: Context,

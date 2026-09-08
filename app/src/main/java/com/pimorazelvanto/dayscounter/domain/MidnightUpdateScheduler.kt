@@ -1,4 +1,4 @@
-package com.pimorazelvanto.dayscounter.widget
+package com.pimorazelvanto.dayscounter.domain
 
 interface MidnightUpdateScheduler {
     fun schedule()

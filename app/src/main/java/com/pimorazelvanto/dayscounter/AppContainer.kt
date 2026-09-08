@@ -7,11 +7,11 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import com.pimorazelvanto.dayscounter.data.DataStoreWidgetConfigRepository
 import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
 import com.pimorazelvanto.dayscounter.domain.Clock
+import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.domain.SystemClock
+import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 import com.pimorazelvanto.dayscounter.widget.AlarmManagerMidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.widget.GlanceWidgetUpdater
-import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
-import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

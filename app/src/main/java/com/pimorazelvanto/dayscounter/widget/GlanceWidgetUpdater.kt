@@ -2,6 +2,7 @@ package com.pimorazelvanto.dayscounter.widget
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 
 class GlanceWidgetUpdater(
     private val context: Context,

@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
 import com.pimorazelvanto.dayscounter.domain.Clock
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
+import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
-import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
-import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
+import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

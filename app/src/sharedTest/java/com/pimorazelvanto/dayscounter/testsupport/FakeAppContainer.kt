@@ -3,8 +3,8 @@ package com.pimorazelvanto.dayscounter.testsupport
 import com.pimorazelvanto.dayscounter.AppContainer
 import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
 import com.pimorazelvanto.dayscounter.domain.Clock
-import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
-import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
+import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
+import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDate
