@@ -1,11 +1,9 @@
-// MatchingDeclarationName: ConfigTestTags names the screen below, so it is read alongside it
-// rather than from a file of its own.
-@file:Suppress("MatchingDeclarationName")
-
 package com.pimorazelvanto.dayscounter.config
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -42,8 +39,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
@@ -51,20 +52,6 @@ import com.pimorazelvanto.dayscounter.domain.ValidationResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-
-/** Addressed by the instrumentation tests, so the strings are a contract, not an implementation detail. */
-object ConfigTestTags {
-    const val PREVIEW = "preview"
-    const val TITLE_FIELD = "title_field"
-    const val DATE_FIELD = "date_field"
-    const val DATE_ERROR = "date_error"
-    const val COLOR_FIELD = "color_field"
-    const val COLOR_GRID = "color_grid"
-    const val SAVE_BUTTON = "save_button"
-    const val CANCEL_BUTTON = "cancel_button"
-
-    fun colorOption(color: HeaderColor): String = "color_option_${color.name}"
-}
 
 private val SCREEN_PADDING = 24.dp
 private val SECTION_SPACING = 20.dp
@@ -102,10 +89,15 @@ internal fun ConfigScreen(
         ) {
             WidgetPreview(
                 state = state.preview,
+                // The preview is one picture, not three readable pieces: clearing the
+                // descendants keeps a screen reader from announcing the container, the title
+                // and the day count as separate nodes. The test tag is set inside the block
+                // because the clear would otherwise drop it.
                 modifier =
-                    Modifier
-                        .testTag(ConfigTestTags.PREVIEW)
-                        .semantics { contentDescription = previewDescription },
+                    Modifier.clearAndSetSemantics {
+                        testTag = ConfigTestTags.PREVIEW
+                        contentDescription = previewDescription
+                    },
             )
             TitleField(state, onTitleChanged)
             DateField(state, onClick = { showDatePicker = true })
@@ -179,9 +171,12 @@ private fun TitleField(
 }
 
 /**
- * The field itself is disabled so that it never takes focus or opens a keyboard; the
- * `clickable` modifier around it is what opens the picker, and the colours undo the
- * greyed-out look a disabled field would otherwise have.
+ * A field that opens the picker rather than accepting typing. It stays enabled and is only
+ * `readOnly`: disabling it would merge a `Disabled` property into its semantics node, and an
+ * accessibility service then refuses the click, leaving the picker unreachable by screen
+ * reader. Because an enabled field consumes the touch itself, the tap arrives as a press
+ * interaction; the surrounding `clickable` supplies the click action a screen reader
+ * activates and catches taps on the border and label outside the text area.
  */
 @Composable
 private fun DateField(
@@ -190,21 +185,21 @@ private fun DateField(
 ) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
     val isError = state.validation == ValidationResult.NotInFuture
+    val interactionSource = remember { MutableInteractionSource() }
+    val currentOnClick by rememberUpdatedState(onClick)
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            if (interaction is PressInteraction.Release) currentOnClick()
+        }
+    }
     OutlinedTextField(
         value = state.targetDate?.format(formatter) ?: "",
         onValueChange = {},
         readOnly = true,
-        enabled = false,
         isError = isError,
+        interactionSource = interactionSource,
         label = { Text(stringResource(R.string.config_label_target_date)) },
         placeholder = { Text(stringResource(R.string.config_pick_date)) },
-        colors =
-            OutlinedTextFieldDefaults.colors(
-                disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
         supportingText =
             if (isError) {
                 {
@@ -217,7 +212,11 @@ private fun DateField(
             } else {
                 null
             },
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).testTag(ConfigTestTags.DATE_FIELD),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(role = Role.Button, onClick = onClick)
+                .testTag(ConfigTestTags.DATE_FIELD),
     )
 }
 

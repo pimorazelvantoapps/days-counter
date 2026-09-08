@@ -1,13 +1,14 @@
 package com.pimorazelvanto.dayscounter.config
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -45,7 +47,11 @@ internal fun ColorPickerDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(SWATCH_SPACING),
-                modifier = Modifier.fillMaxWidth().testTag(ConfigTestTags.COLOR_GRID),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .selectableGroup()
+                        .testTag(ConfigTestTags.COLOR_GRID),
             ) {
                 HeaderColor.entries.chunked(GRID_COLUMNS).forEach { rowColors ->
                     Row(
@@ -65,6 +71,11 @@ internal fun ColorPickerDialog(
     )
 }
 
+/**
+ * `selectable` rather than `clickable`, so that a screen reader announces which of the twelve
+ * swatches is the chosen one; the check mark is the same statement in visual form and therefore
+ * carries no description of its own.
+ */
 @Composable
 private fun ColorSwatch(
     color: HeaderColor,
@@ -78,7 +89,7 @@ private fun ColorSwatch(
                 .size(SWATCH_SIZE)
                 .clip(CircleShape)
                 .background(Color(color.argb))
-                .clickable(onClick = onClick)
+                .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
                 .semantics { contentDescription = description }
                 .testTag(ConfigTestTags.colorOption(color)),
         contentAlignment = Alignment.Center,

@@ -25,6 +25,12 @@ import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
 
 private val PREVIEW_SIZE = 72.dp
+
+// Deliberately not android.R.dimen.system_app_widget_background_radius, which the widget itself
+// uses: that is an absolute 16dp to 28dp depending on the device and would eat most of the edge
+// of a box this small. The preview is not shown at the widget's real size, so its corner is not
+// the widget's corner either.
+private val PREVIEW_CORNER = 12.dp
 private val HEADER_PADDING = 4.dp
 private val TITLE_TEXT_SIZE = 10.sp
 private val VALUE_TEXT_SIZE_LARGE = 22.sp
@@ -36,8 +42,9 @@ private const val SHEET_WEIGHT = 1f
  * Restates the Glance sheet of `widget/DaysCounterWidgetContent.kt` in ordinary Compose,
  * because Glance composables cannot render inside an activity. Both are driven by the same
  * [WidgetUiState]; the shared colour and dimension resources keep most of the design from
- * drifting. The four text sizes above are a second copy, because Compose can read a dp
- * dimension resource but not an sp one.
+ * drifting. The four text sizes above are a third copy, after the Glance sheet and
+ * `res/layout/widget_preview.xml`, because Compose can read a dp dimension resource but not an
+ * sp one. The KEEP IN SYNC block in the Glance file lists every pair.
  */
 @Composable
 fun WidgetPreview(
@@ -48,7 +55,7 @@ fun WidgetPreview(
         modifier =
             modifier
                 .size(PREVIEW_SIZE)
-                .clip(RoundedCornerShape(dimensionResource(android.R.dimen.system_app_widget_background_radius)))
+                .clip(RoundedCornerShape(PREVIEW_CORNER))
                 .background(colorResource(R.color.widget_sheet_background)),
     ) {
         Box(

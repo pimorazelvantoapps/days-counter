@@ -42,14 +42,23 @@ private val CONTENT_PADDING = 4.dp
 // against its own configuration instead of ours and would get night mode silently wrong.
 // The day/night factory below resolves inside Glance itself.
 //
-// KEEP IN SYNC WITH res/layout/widget_preview.xml, the static launcher preview, which restates
-// this composable in view XML:
-//   HEADER_TEXT_COLOR      <-> @color/widget_header_text
-//   SHEET_TEXT_COLOR       <-> @color/widget_sheet_text (plus its values-night override)
-//   TITLE_TEXT_SIZE        <-> @dimen/widget_title_text_size
-//   VALUE_TEXT_SIZE_LARGE  <-> @dimen/widget_value_text_size_large
-// The header height and the sheet background are genuinely shared resources, so they cannot
-// drift; the four pairs above can.
+// KEEP IN SYNC WITH the two other renderings of this design:
+//   res/layout/widget_preview.xml  the static launcher preview, restated in view XML
+//   config/WidgetPreview.kt        the Compose mirror on the configuration screen, which cannot
+//                                  use Glance because Glance does not render inside an activity
+// What can drift, and where:
+//   HEADER_TEXT_COLOR       <-> @color/widget_header_text (both other renderings read it)
+//   SHEET_TEXT_COLOR        <-> @color/widget_sheet_text, plus its values-night override
+//   PLACEHOLDER_TEXT_COLOR  <-> @color/widget_placeholder_text, plus its values-night override;
+//                               read only by WidgetPreview.kt, the XML preview has no placeholder
+//   TITLE_TEXT_SIZE         <-> @dimen/widget_title_text_size and WidgetPreview.TITLE_TEXT_SIZE
+//   VALUE_TEXT_SIZE_LARGE   <-> @dimen/widget_value_text_size_large and the same name there
+//   VALUE_TEXT_SIZE_MEDIUM  <-> the same name in WidgetPreview.kt
+//   VALUE_TEXT_SIZE_SMALL   <-> the same name in WidgetPreview.kt
+//   CONTENT_PADDING         <-> WidgetPreview.HEADER_PADDING
+// Compose cannot read an sp dimension resource, which is why the four text sizes are restated
+// in Kotlin there rather than shared. @dimen/widget_header_height and
+// @color/widget_sheet_background are read as resources by all three.
 private val HEADER_TEXT_COLOR = ColorProvider(Color.White)
 
 @Suppress("MagicNumber") // ARGB literals are the palette itself, not values to name.
