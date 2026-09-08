@@ -1,5 +1,6 @@
 package com.pimorazelvanto.dayscounter
 
+import android.app.AlarmManager
 import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
@@ -7,6 +8,7 @@ import com.pimorazelvanto.dayscounter.data.DataStoreWidgetConfigRepository
 import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
 import com.pimorazelvanto.dayscounter.domain.Clock
 import com.pimorazelvanto.dayscounter.domain.SystemClock
+import com.pimorazelvanto.dayscounter.widget.AlarmManagerMidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -39,17 +41,16 @@ class DefaultAppContainer(
 
     override val widgetUpdater: WidgetUpdater = NoOpWidgetUpdater
 
-    override val midnightUpdateScheduler: MidnightUpdateScheduler = NoOpMidnightUpdateScheduler
+    override val midnightUpdateScheduler: MidnightUpdateScheduler =
+        AlarmManagerMidnightUpdateScheduler(
+            applicationContext,
+            applicationContext.getSystemService(AlarmManager::class.java),
+            clock,
+        )
 }
 
 private object NoOpWidgetUpdater : WidgetUpdater {
     override suspend fun updateAll() = Unit
-}
-
-private object NoOpMidnightUpdateScheduler : MidnightUpdateScheduler {
-    override fun schedule() = Unit
-
-    override fun cancel() = Unit
 }
 
 val Context.appContainer: AppContainer
