@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Days Counter</string>
+    <string name="widget_description">Counts the days until a date</string>
+    <string name="default_title">days</string>
+    <string name="widget_preview_value">42</string>
 </resources>

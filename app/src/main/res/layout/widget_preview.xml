@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Overdraw: this layout is only ever inflated as an app-widget preview, never under an
+     activity theme, so the theme background lint infers is never actually painted. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/widget_sheet_background"
+    android:orientation="vertical"
+    tools:ignore="Overdraw">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/widget_preview_header"
+        android:gravity="center"
+        android:text="@string/default_title"
+        android:textColor="@color/widget_header_text"
+        android:textSize="@dimen/widget_title_text_size" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="@string/widget_preview_value"
+        android:textColor="@color/widget_sheet_text"
+        android:textSize="@dimen/widget_value_text_size_large"
+        android:textStyle="bold" />
+</LinearLayout>

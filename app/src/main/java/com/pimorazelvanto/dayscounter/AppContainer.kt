@@ -9,6 +9,7 @@ import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
 import com.pimorazelvanto.dayscounter.domain.Clock
 import com.pimorazelvanto.dayscounter.domain.SystemClock
 import com.pimorazelvanto.dayscounter.widget.AlarmManagerMidnightUpdateScheduler
+import com.pimorazelvanto.dayscounter.widget.GlanceWidgetUpdater
 import com.pimorazelvanto.dayscounter.widget.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +40,7 @@ class DefaultAppContainer(
             },
         )
 
-    override val widgetUpdater: WidgetUpdater = NoOpWidgetUpdater
+    override val widgetUpdater: WidgetUpdater = GlanceWidgetUpdater(applicationContext)
 
     override val midnightUpdateScheduler: MidnightUpdateScheduler =
         AlarmManagerMidnightUpdateScheduler(
@@ -47,10 +48,6 @@ class DefaultAppContainer(
             applicationContext.getSystemService(AlarmManager::class.java),
             clock,
         )
-}
-
-private object NoOpWidgetUpdater : WidgetUpdater {
-    override suspend fun updateAll() = Unit
 }
 
 val Context.appContainer: AppContainer

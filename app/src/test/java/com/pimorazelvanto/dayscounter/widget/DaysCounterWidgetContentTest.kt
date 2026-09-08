@@ -1,0 +1,73 @@
+package com.pimorazelvanto.dayscounter.widget
+
+import android.content.Context
+import android.content.Intent
+import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
+import androidx.glance.testing.unit.assertHasText
+import androidx.glance.testing.unit.hasClickAction
+import androidx.glance.testing.unit.hasTestTag
+import androidx.test.core.app.ApplicationProvider
+import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
+import com.pimorazelvanto.dayscounter.domain.HeaderColor
+import com.pimorazelvanto.dayscounter.domain.WidgetUiState
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
+class DaysCounterWidgetContentTest {
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val anyClick = actionStartActivity(Intent(Intent.ACTION_VIEW))
+
+    @Test
+    fun `renders title and value`() =
+        runGlanceAppWidgetUnitTest {
+            setContext(context)
+            provideComposable {
+                DaysCounterWidgetContent(
+                    WidgetUiState("Urlaub", "42", DigitSizeTier.LARGE, HeaderColor.BLUE, isPlaceholder = false),
+                    onClick = anyClick,
+                )
+            }
+
+            onNode(hasTestTag("title")).assertHasText("Urlaub")
+            onNode(hasTestTag("value")).assertHasText("42")
+        }
+
+    @Test
+    fun `renders placeholder text`() =
+        runGlanceAppWidgetUnitTest {
+            setContext(context)
+            provideComposable {
+                DaysCounterWidgetContent(
+                    WidgetUiState(
+                        "Tage",
+                        WidgetUiState.PLACEHOLDER_TEXT,
+                        DigitSizeTier.LARGE,
+                        HeaderColor.RED,
+                        isPlaceholder = true,
+                    ),
+                    onClick = anyClick,
+                )
+            }
+
+            onNode(hasTestTag("value")).assertHasText(WidgetUiState.PLACEHOLDER_TEXT)
+        }
+
+    @Test
+    fun `whole widget is clickable`() =
+        runGlanceAppWidgetUnitTest {
+            setContext(context)
+            provideComposable {
+                DaysCounterWidgetContent(
+                    WidgetUiState("Tage", "3", DigitSizeTier.LARGE, HeaderColor.RED, isPlaceholder = false),
+                    onClick = anyClick,
+                )
+            }
+
+            onNode(hasTestTag("root")).assert(hasClickAction())
+        }
+}
