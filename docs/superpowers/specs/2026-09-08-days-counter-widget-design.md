@@ -138,19 +138,19 @@ wird im Textfeld abgeschnitten. Im Widget einzeilig mit Auslassungspunkten gekü
 
 ## 6. Speicher
 
-Glance-Preferences-DataStore pro Widget-ID, drei Schlüssel:
+Ein Preferences-DataStore der App (Datei `widget_configs`), Schlüssel pro Widget-ID mit Suffix `_<appWidgetId>`. Bewusst nicht der Glance-eigene Zustand, weil dessen `GlanceId` nur für real existierende Widgets erzeugt werden kann und damit in JVM-Tests nicht verfügbar ist. Drei Schlüssel pro Widget:
 
 | Schlüssel | Typ | Inhalt |
 |---|---|---|
-| `title` | String | Anzeigetitel |
-| `target_date` | String | ISO-8601, z. B. `2027-03-15` |
-| `color` | String | Enum-Name aus `HeaderColor` |
+| `title_<id>` | String | Anzeigetitel |
+| `target_date_<id>` | String | ISO-8601, z. B. `2027-03-15` |
+| `color_<id>` | String | Enum-Name aus `HeaderColor` |
 
 `WidgetConfigRepository` liefert `WidgetConfig` oder `null`, wenn ein Schlüssel fehlt oder
 ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand.
 
-Beim Entfernen eines Widgets (`onDeleted`) löscht Glance den Zustand. Existiert danach
-kein Widget mehr, wird der Mitternachtsalarm abgemeldet.
+Beim Entfernen eines Widgets (`onDeleted`) löscht das Repository die drei Schlüssel. Meldet
+`AppWidgetManager` danach keine Widgets dieser App mehr, wird der Mitternachtsalarm abgemeldet.
 
 ## 7. Aktualisierung
 
@@ -203,7 +203,9 @@ verpasster Alarm wird beim nächsten Anlass korrigiert.
   `resizeMode=none`, `configure=ConfigActivity`, kein `updatePeriodMillis`.
 - Tipp auf die gesamte Fläche: `actionStartActivity(ConfigActivity)` mit Widget-ID.
 - Platzhalter ohne Konfiguration: Standardtitel auf rotem Header, „–“ gedämpft im Blatt.
-- Launcher-Vorschau wird aus demselben Composable erzeugt.
+- Launcher-Vorschau über `previewLayout`, ein kleines XML-Layout, das Header und Zahl mit
+  denselben Farb- und Maßressourcen nachbildet. Glance-Composables lassen sich nicht ohne
+  platziertes Widget als Vorschau registrieren, und die App hat keinen Startpunkt davor.
 
 ## 9. Konfigurationsoberfläche
 
@@ -291,7 +293,9 @@ Vollständige Abdeckung von `domain`:
 - Speichern deaktiviert ohne Datum.
 - Abbrechen → `RESULT_CANCELED`, nichts geschrieben.
 - Farbdialog: 12 Felder sichtbar, Auswahl aktualisiert Vorschau.
-- Smoke-Test: Widget im `AppWidgetHost` der Test-App hosten, rendert ohne Absturz.
+- Smoke-Test: Widget-Composable über `GlanceRemoteViews` zu `RemoteViews` übersetzen und
+  in eine echte View-Hierarchie inflaten; rendert ohne Absturz, Zahl und Titel sind als
+  `TextView` vorhanden. `AppWidgetHost` würde eine Shell-Berechtigung im Test erfordern.
 
 ### Statische Analyse (im Gradle-Task `check`)
 
