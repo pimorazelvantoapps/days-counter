@@ -1,7 +1,5 @@
 package com.pimorazelvanto.dayscounter.widget
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -16,6 +14,11 @@ class DaysCounterWidgetReceiver : GlanceAppWidgetReceiver() {
         context.appContainer.midnightUpdateScheduler.schedule()
     }
 
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        context.appContainer.midnightUpdateScheduler.cancel()
+    }
+
     override fun onDeleted(
         context: Context,
         appWidgetIds: IntArray,
@@ -26,15 +29,9 @@ class DaysCounterWidgetReceiver : GlanceAppWidgetReceiver() {
         container.backgroundScope.launch {
             try {
                 appWidgetIds.forEach { container.repository.delete(it) }
-                if (remainingWidgetIds(context).isEmpty()) container.midnightUpdateScheduler.cancel()
             } finally {
                 pendingResult?.finish()
             }
         }
     }
-
-    private fun remainingWidgetIds(context: Context): IntArray =
-        AppWidgetManager
-            .getInstance(context)
-            .getAppWidgetIds(ComponentName(context, DaysCounterWidgetReceiver::class.java))
 }

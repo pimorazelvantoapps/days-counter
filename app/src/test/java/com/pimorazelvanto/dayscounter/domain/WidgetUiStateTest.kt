@@ -29,6 +29,26 @@ class WidgetUiStateTest {
     }
 
     @Test
+    fun `target day itself shows zero on the large tier`() {
+        val config = WidgetConfig("Umzug", today, HeaderColor.GREEN)
+
+        val state = WidgetUiState.from(config, today, "Tage")
+
+        assertEquals("0", state.valueText)
+        assertEquals(DigitSizeTier.LARGE, state.sizeTier)
+    }
+
+    @Test
+    fun `three digit values use medium tier`() {
+        val config = WidgetConfig("Abschluss", today.plusDays(365), HeaderColor.TEAL)
+
+        val state = WidgetUiState.from(config, today, "Tage")
+
+        assertEquals("365", state.valueText)
+        assertEquals(DigitSizeTier.MEDIUM, state.sizeTier)
+    }
+
+    @Test
     fun `four digit values use small tier`() {
         val config = WidgetConfig("Rente", today.plusDays(4000), HeaderColor.GREY)
 

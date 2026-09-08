@@ -3,9 +3,9 @@ package com.pimorazelvanto.dayscounter.widget
 import android.content.Context
 import android.content.Intent
 import androidx.glance.appwidget.action.actionStartActivity
+import androidx.glance.appwidget.testing.unit.hasStartActivityClickAction
 import androidx.glance.appwidget.testing.unit.runGlanceAppWidgetUnitTest
-import androidx.glance.testing.unit.assertHasText
-import androidx.glance.testing.unit.hasClickAction
+import androidx.glance.testing.unit.assertHasTextEqualTo
 import androidx.glance.testing.unit.hasTestTag
 import androidx.test.core.app.ApplicationProvider
 import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
@@ -20,7 +20,8 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class DaysCounterWidgetContentTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val anyClick = actionStartActivity(Intent(Intent.ACTION_VIEW))
+    private val clickIntent = Intent(Intent.ACTION_VIEW)
+    private val anyClick = actionStartActivity(clickIntent)
 
     @Test
     fun `renders title and value`() =
@@ -33,8 +34,8 @@ class DaysCounterWidgetContentTest {
                 )
             }
 
-            onNode(hasTestTag("title")).assertHasText("Urlaub")
-            onNode(hasTestTag("value")).assertHasText("42")
+            onNode(hasTestTag("title")).assertHasTextEqualTo("Urlaub")
+            onNode(hasTestTag("value")).assertHasTextEqualTo("42")
         }
 
     @Test
@@ -54,11 +55,11 @@ class DaysCounterWidgetContentTest {
                 )
             }
 
-            onNode(hasTestTag("value")).assertHasText(WidgetUiState.PLACEHOLDER_TEXT)
+            onNode(hasTestTag("value")).assertHasTextEqualTo(WidgetUiState.PLACEHOLDER_TEXT)
         }
 
     @Test
-    fun `whole widget is clickable`() =
+    fun `whole widget opens the supplied action`() =
         runGlanceAppWidgetUnitTest {
             setContext(context)
             provideComposable {
@@ -68,6 +69,6 @@ class DaysCounterWidgetContentTest {
                 )
             }
 
-            onNode(hasTestTag("root")).assert(hasClickAction())
+            onNode(hasTestTag("root")).assert(hasStartActivityClickAction(clickIntent))
         }
 }

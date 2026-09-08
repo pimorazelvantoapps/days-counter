@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.color.ColorProvider
@@ -35,14 +36,20 @@ private val VALUE_TEXT_SIZE_LARGE = 22.sp
 private val VALUE_TEXT_SIZE_MEDIUM = 17.sp
 private val VALUE_TEXT_SIZE_SMALL = 13.sp
 private val CONTENT_PADDING = 4.dp
-private val HEADER_HEIGHT = 18.dp
 
 // These are literals rather than colour resources because Glance restricts its @ColorRes
 // ColorProvider: a widget is rendered by the launcher process, which may resolve a resource
 // against its own configuration instead of ours and would get night mode silently wrong.
 // The day/night factory below resolves inside Glance itself.
-// KEEP IN SYNC WITH res/layout/widget_preview.xml, which paints the same palette as
-// @color/widget_header_text and @color/widget_sheet_text for the launcher preview.
+//
+// KEEP IN SYNC WITH res/layout/widget_preview.xml, the static launcher preview, which restates
+// this composable in view XML:
+//   HEADER_TEXT_COLOR      <-> @color/widget_header_text
+//   SHEET_TEXT_COLOR       <-> @color/widget_sheet_text (plus its values-night override)
+//   TITLE_TEXT_SIZE        <-> @dimen/widget_title_text_size
+//   VALUE_TEXT_SIZE_LARGE  <-> @dimen/widget_value_text_size_large
+// The header height and the sheet background are genuinely shared resources, so they cannot
+// drift; the four pairs above can.
 private val HEADER_TEXT_COLOR = ColorProvider(Color.White)
 
 @Suppress("MagicNumber") // ARGB literals are the palette itself, not values to name.
@@ -64,6 +71,7 @@ fun DaysCounterWidgetContent(
             GlanceModifier
                 .fillMaxSize()
                 .background(R.color.widget_sheet_background)
+                .appWidgetBackground()
                 .cornerRadius(android.R.dimen.system_app_widget_background_radius)
                 .clickable(onClick)
                 .semantics { testTag = "root" },
@@ -79,7 +87,7 @@ private fun Header(state: WidgetUiState) {
         modifier =
             GlanceModifier
                 .fillMaxWidth()
-                .height(HEADER_HEIGHT)
+                .height(R.dimen.widget_header_height)
                 .background(ColorProvider(Color(state.color.argb)))
                 .padding(horizontal = CONTENT_PADDING),
         contentAlignment = Alignment.Center,
