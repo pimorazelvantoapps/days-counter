@@ -161,12 +161,18 @@ Ein Preferences-DataStore der App (Datei `widget_configs`), Schlüssel pro Widge
 | `target_date_<id>` | String | ISO-8601, z. B. `2027-03-15` |
 | `color_<id>` | String | Enum-Name aus `HeaderColor` |
 
+Eine unlesbare Store-Datei wird über einen `ReplaceFileCorruptionHandler` durch eine leere
+ersetzt, statt jeden Lesevorgang scheitern zu lassen: ohne Launcher-Eintrag bliebe sonst nur
+das Löschen der App-Daten in den Systemeinstellungen als Ausweg.
+
 `WidgetConfigRepository` liefert `WidgetConfig` oder `null`, wenn ein Schlüssel fehlt oder
 ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand. Gelesen wird als
 Strom (`observe`), der bei jeder Änderung erneut liefert; `load` ist dessen erster Wert.
 
-Beim Entfernen eines Widgets (`onDeleted`) löscht das Repository die drei Schlüssel. Meldet
-`AppWidgetManager` danach keine Widgets dieser App mehr, wird der Mitternachtsalarm abgemeldet.
+Beim Entfernen eines Widgets (`onDeleted`) löscht das Repository die drei Schlüssel. Wird das
+letzte Widget entfernt, wird der Mitternachtsalarm in `onDisabled` abgemeldet; das System ruft
+diesen Rückruf genau dann auf, sodass `AppWidgetManager` nicht nach übrigen Widgets befragt
+werden muss.
 
 ## 7. Aktualisierung
 
@@ -241,6 +247,8 @@ beim nächsten Anlass korrigiert.
    Abbrechen lässt das Widget unverändert.
 
 Ohne gültige Widget-ID im Intent beendet sich die Activity sofort. Kein Launcher-Eintrag.
+Der Dialog folgt dem Systemthema wie das Widget-Blatt: `values-night/themes.xml` für Fenster
+und Statusleiste, dunkles Material-3-Farbschema für den Compose-Inhalt.
 
 ### Aufbau
 
@@ -278,6 +286,8 @@ Repository schreiben, `DaysCounterWidget.update(widgetId)` anstoßen,
 - Datum wird bei offenem Dialog über Mitternacht ungültig: Speichern deaktiviert,
   Hinweistext unter dem Datumsfeld.
 - Schreibfehler im DataStore: Snackbar, Activity bleibt offen.
+- Lesefehler im DataStore: Dialog startet mit den Standardwerten, damit das Widget neu
+  eingerichtet werden kann.
 
 ### Texte
 
@@ -298,6 +308,8 @@ Vollständige Abdeckung von `domain`:
 - `TargetDateValidator`: heute ungültig, morgen gültig, gestern ungültig.
 - `HeaderColor`: 12 Einträge, eindeutige Namen, Rundreise Name→Enum→Name, unbekannter
   Name liefert Fehler statt Absturz.
+- `SystemClock`: `days()` liefert beim Sammeln den heutigen Tag, erneut nach `dateChanged()`
+  mit gewechseltem Tag und nicht zweimal für denselben Tag.
 - `ConfigViewModel`: Startzustand, Laden, `isValid`, Speichern; gefälschte `Clock` sowie
   gefälschtes Repository, Updater und Scheduler aus `app/src/sharedTest/java`, kein Android-
   Bezug nötig.
@@ -309,9 +321,13 @@ Vollständige Abdeckung von `domain`:
 - `MidnightUpdateScheduler`: genau ein Alarm auf nächste Mitternacht in Gerätezeitzone,
   Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
 - `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst
-  Update und Neuplanung aus.
-- Glance-Layout mit `glance-testing`: Titel, Zahl, Farbe für gegebene Konfiguration;
-  Platzhalter-Zustand.
+  Update und Neuplanung aus; die behandelten Aktionen und die Intent-Filter des Manifests
+  stimmen in beiden Richtungen überein.
+- `DaysCounterWidgetReceiver`: `onEnabled` plant den Alarm, `onDisabled` meldet ihn ab,
+  `onDeleted` löscht die Konfiguration der entfernten Widgets.
+- Glance-Layout mit `glance-testing`: Titel und Zahl für gegebene Konfiguration;
+  Platzhalter-Zustand. Die Header-Farbe bleibt ungeprüft, weil die Unit-Test-Umgebung von
+  Glance keinen Farb-Matcher anbietet.
 
 ### Instrumentierte Tests (Emulator, Compose UI Test)
 

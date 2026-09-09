@@ -2,6 +2,7 @@ package com.pimorazelvanto.dayscounter.domain
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -65,5 +66,11 @@ class WidgetUiStateTest {
         assertEquals(HeaderColor.DEFAULT, state.color)
         assertEquals(DigitSizeTier.LARGE, state.sizeTier)
         assertFalse(WidgetUiState.from(WidgetConfig("x", today, HeaderColor.RED), today, "Tage").isPlaceholder)
+    }
+
+    @Test
+    fun `placeholder is an en dash and not the hyphen of a passed target`() {
+        assertEquals("\u2013", WidgetUiState.PLACEHOLDER_TEXT)
+        assertNotEquals(DisplayValue.Passed.text, WidgetUiState.PLACEHOLDER_TEXT)
     }
 }

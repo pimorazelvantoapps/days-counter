@@ -28,7 +28,8 @@ class DateChangeReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_MIDNIGHT = "com.pimorazelvanto.dayscounter.action.MIDNIGHT"
 
-        private val HANDLED_ACTIONS =
+        /** Internal so that a test can compare it against the intent filters of the manifest. */
+        internal val HANDLED_ACTIONS =
             setOf(
                 ACTION_MIDNIGHT,
                 Intent.ACTION_TIMEZONE_CHANGED,

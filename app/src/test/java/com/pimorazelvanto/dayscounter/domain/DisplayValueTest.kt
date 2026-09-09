@@ -15,7 +15,7 @@ class DisplayValueTest {
     }
 
     @Test
-    fun `passed renders as hyphen`() {
-        assertEquals("-", DisplayValue.Passed.text)
+    fun `passed renders as an ascii hyphen`() {
+        assertEquals("\u002D", DisplayValue.Passed.text)
     }
 }

@@ -5,6 +5,7 @@ import com.pimorazelvanto.dayscounter.domain.WidgetConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import java.io.IOException
@@ -14,6 +15,9 @@ class FakeWidgetConfigRepository : WidgetConfigRepository {
     val saved = mutableMapOf<Int, WidgetConfig>()
     var failOnSave = false
 
+    /** Makes the read stream fail, the way DataStore reports a file it cannot read. */
+    var failOnRead = false
+
     /** The widget id a composition asked to observe, so that a test can configure that widget. */
     var observedAppWidgetId: Int? = null
         private set
@@ -22,6 +26,7 @@ class FakeWidgetConfigRepository : WidgetConfigRepository {
 
     override fun observe(appWidgetId: Int): Flow<WidgetConfig?> {
         observedAppWidgetId = appWidgetId
+        if (failOnRead) return flow { throw IOException("simulated read failure") }
         return changes.map { saved[appWidgetId] }.distinctUntilChanged()
     }
 

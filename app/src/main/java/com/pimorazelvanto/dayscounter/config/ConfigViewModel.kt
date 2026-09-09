@@ -72,8 +72,19 @@ class ConfigViewModel(
         mutableUiState.update { it.copy(saveState = SaveState.Idle) }
     }
 
+    /**
+     * A read failure leaves the screen on its defaults, so that the widget stays configurable:
+     * an exception escaping here would reach `viewModelScope` and crash the only entry point
+     * the app has.
+     */
+    @Suppress("SwallowedException") // Reading defaults instead is the whole point of the catch.
     private suspend fun loadExistingConfig() {
-        val existing = repository.load(appWidgetId) ?: return
+        val existing =
+            try {
+                repository.load(appWidgetId)
+            } catch (_: IOException) {
+                null
+            } ?: return
         mutableUiState.update {
             it.copy(title = existing.title, targetDate = existing.targetDate, color = existing.color)
         }

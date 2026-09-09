@@ -7,7 +7,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +41,7 @@ class ConfigActivity : ComponentActivity() {
             return
         }
         setContent {
-            MaterialTheme {
+            DaysCounterTheme {
                 val state by viewModel.uiState.collectAsState()
                 LaunchedEffect(state.saveState) {
                     if (state.saveState == SaveState.Saved) finishWithSuccess()
@@ -75,4 +79,16 @@ class ConfigActivity : ComponentActivity() {
                 .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
     }
+}
+
+/**
+ * Follows the system setting, like the widget sheet the preview inside the screen mirrors.
+ * Without this the dialog would open in Material 3's light scheme on a dark phone.
+ */
+@Composable
+private fun DaysCounterTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme(),
+        content = content,
+    )
 }

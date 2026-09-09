@@ -1,5 +1,6 @@
 package com.pimorazelvanto.dayscounter.widget
 
+import android.content.ComponentName
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.pimorazelvanto.dayscounter.DaysCounterApplication
@@ -10,6 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -54,22 +56,39 @@ class DateChangeReceiverTest {
     }
 
     @Test
-    fun `receiver is registered in manifest for all system actions`() {
-        val packageManager = application.packageManager
-        val systemActions =
+    fun `manifest declares a filter for every handled action but the explicit alarm`() {
+        val component = ComponentName(application, DateChangeReceiver::class.java)
+        val declared =
+            shadowOf(application.packageManager)
+                .getIntentFiltersForReceiver(component)
+                .flatMap { filter -> (0 until filter.countActions()).map(filter::getAction) }
+                .toSet()
+
+        assertEquals(
+            DateChangeReceiver.HANDLED_ACTIONS - DateChangeReceiver.ACTION_MIDNIGHT,
+            declared,
+        )
+    }
+
+    @Test
+    fun `each declared system broadcast is delivered to this receiver`() {
+        val receiverName = DateChangeReceiver::class.java.name
+        val exclusiveActions =
             listOf(
                 Intent.ACTION_TIMEZONE_CHANGED,
                 Intent.ACTION_TIME_CHANGED,
                 Intent.ACTION_BOOT_COMPLETED,
-                Intent.ACTION_MY_PACKAGE_REPLACED,
             )
 
-        systemActions.forEach { action ->
-            // Contains rather than exact-match: Glance registers its own receivers for
-            // some of these actions (e.g. MY_PACKAGE_REPLACED), so other entries are expected.
-            val receivers = packageManager.queryBroadcastReceivers(Intent(action), 0)
-            val names = receivers.map { it.activityInfo.name }
-            assertTrue("receiver for $action", names.contains(DateChangeReceiver::class.java.name))
+        exclusiveActions.forEach { action ->
+            assertEquals(action, listOf(receiverName), resolvedReceiverNames(action))
         }
+        // Glance registers a receiver of its own for this one, so further entries are expected.
+        assertTrue(resolvedReceiverNames(Intent.ACTION_MY_PACKAGE_REPLACED).contains(receiverName))
     }
+
+    private fun resolvedReceiverNames(action: String): List<String> =
+        application.packageManager
+            .queryBroadcastReceivers(Intent(action), 0)
+            .map { it.activityInfo.name }
 }

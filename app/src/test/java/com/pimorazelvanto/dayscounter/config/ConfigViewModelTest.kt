@@ -71,6 +71,31 @@ class ConfigViewModelTest {
     }
 
     @Test
+    fun `unreadable storage leaves the screen on its defaults and raises nothing`() {
+        repository.saved[7] = WidgetConfig("Urlaub", today.plusDays(10), HeaderColor.TEAL)
+        repository.failOnRead = true
+        // The unconfined dispatcher runs the load on this thread, so an exception escaping the
+        // coroutine is handed to this thread's uncaught exception handler: the same hand-off that
+        // ends the process on a device.
+        val uncaught = mutableListOf<Throwable>()
+        val thread = Thread.currentThread()
+        val previousHandler = thread.uncaughtExceptionHandler
+        thread.setUncaughtExceptionHandler { _, throwable -> uncaught += throwable }
+
+        val state =
+            try {
+                viewModel().uiState.value
+            } finally {
+                thread.setUncaughtExceptionHandler(previousHandler)
+            }
+
+        assertEquals(emptyList<Throwable>(), uncaught)
+        assertEquals("Tage", state.title)
+        assertNull(state.targetDate)
+        assertEquals(HeaderColor.DEFAULT, state.color)
+    }
+
+    @Test
     fun `title is truncated to max length`() {
         val vm = viewModel()
 
