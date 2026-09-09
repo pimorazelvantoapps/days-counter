@@ -16,6 +16,7 @@ class DateChangeReceiver : BroadcastReceiver() {
         val pendingResult: PendingResult? = goAsync()
         container.backgroundScope.launch {
             try {
+                container.clock.dateChanged()
                 container.widgetUpdater.updateAll()
                 container.midnightUpdateScheduler.schedule()
             } finally {

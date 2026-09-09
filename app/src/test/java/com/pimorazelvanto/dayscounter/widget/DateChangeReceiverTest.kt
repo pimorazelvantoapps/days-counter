@@ -27,7 +27,7 @@ class DateChangeReceiverTest {
     }
 
     @Test
-    fun `handled actions update all widgets and reschedule`() {
+    fun `handled actions announce the date change, update all widgets and reschedule`() {
         val actions =
             listOf(
                 DateChangeReceiver.ACTION_MIDNIGHT,
@@ -39,6 +39,7 @@ class DateChangeReceiverTest {
 
         actions.forEach { receiver.onReceive(application, Intent(it)) }
 
+        assertEquals(actions.size, container.clock.dateChangedCount)
         assertEquals(actions.size, container.widgetUpdater.updateCount)
         assertEquals(actions.size, container.midnightUpdateScheduler.scheduleCount)
     }
@@ -47,6 +48,7 @@ class DateChangeReceiverTest {
     fun `unrelated action is ignored`() {
         receiver.onReceive(application, Intent(Intent.ACTION_BATTERY_LOW))
 
+        assertEquals(0, container.clock.dateChangedCount)
         assertEquals(0, container.widgetUpdater.updateCount)
         assertEquals(0, container.midnightUpdateScheduler.scheduleCount)
     }

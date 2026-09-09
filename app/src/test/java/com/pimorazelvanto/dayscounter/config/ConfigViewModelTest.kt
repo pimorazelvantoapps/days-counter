@@ -2,10 +2,10 @@ package com.pimorazelvanto.dayscounter.config
 
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
+import com.pimorazelvanto.dayscounter.testsupport.ControlledClock
 import com.pimorazelvanto.dayscounter.testsupport.FakeMidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetUpdater
-import com.pimorazelvanto.dayscounter.testsupport.FixedClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -39,7 +39,14 @@ class ConfigViewModelTest {
     }
 
     private fun viewModel(appWidgetId: Int = 7) =
-        ConfigViewModel(appWidgetId, repository, FixedClock(today), widgetUpdater, scheduler, defaultTitle = "Tage")
+        ConfigViewModel(
+            appWidgetId,
+            repository,
+            ControlledClock(today),
+            widgetUpdater,
+            scheduler,
+            defaultTitle = "Tage",
+        )
 
     @Test
     fun `new widget starts with default title, no date and default color`() {
@@ -146,19 +153,12 @@ class ConfigViewModelTest {
 
     @Test
     fun `refreshToday invalidates a date that became today`() {
-        val clockThatAdvances =
-            object : com.pimorazelvanto.dayscounter.domain.Clock {
-                var current = today
-
-                override fun today() = current
-
-                override fun zone() = java.time.ZoneId.of("Europe/Berlin")
-            }
-        val vm = ConfigViewModel(7, repository, clockThatAdvances, widgetUpdater, scheduler, "Tage")
+        val clock = ControlledClock(today)
+        val vm = ConfigViewModel(7, repository, clock, widgetUpdater, scheduler, "Tage")
         vm.onTargetDateChanged(today.plusDays(1))
         assertTrue(vm.uiState.value.isValid)
 
-        clockThatAdvances.current = today.plusDays(1)
+        clock.moveTo(today.plusDays(1))
         vm.refreshToday()
 
         assertFalse(vm.uiState.value.isValid)

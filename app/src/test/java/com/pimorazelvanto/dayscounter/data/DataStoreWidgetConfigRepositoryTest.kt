@@ -7,10 +7,15 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -85,6 +90,25 @@ class DataStoreWidgetConfigRepositoryTest {
 
             assertNull(repository.load(1))
             assertEquals(config, repository.load(2))
+        }
+
+    @Test
+    fun `observe emits the config saved while it is being collected`() =
+        runBlocking {
+            val collecting = CompletableDeferred<Unit>()
+            val afterSave =
+                async(Dispatchers.IO) {
+                    repository
+                        .observe(7)
+                        .onEach { collecting.complete(Unit) }
+                        .drop(1)
+                        .first()
+                }
+            collecting.await()
+
+            repository.save(7, config)
+
+            assertEquals(config, afterSave.await())
         }
 
     @Test

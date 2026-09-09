@@ -69,7 +69,7 @@ com.pimorazelvanto.dayscounter
 ├── DaysCounterApplication      Application, hält AppContainer
 ├── AppContainer                Manuelle Konstruktion der Abhängigkeiten
 ├── domain/                     Reine Kotlin-Logik, keine Android-Abhängigkeit
-│   ├── Clock                   Schnittstelle: today(): LocalDate
+│   ├── Clock                   Schnittstelle: today(), days(): Flow<LocalDate>
 │   ├── SystemClock             Produktiv-Implementierung, Gerätezeitzone
 │   ├── DaysCalculator          (today, target) -> DisplayValue
 │   ├── DisplayValue            Sealed: Days(n) | Reached | Passed, plus Anzeigetext
@@ -81,7 +81,7 @@ com.pimorazelvanto.dayscounter
 │   ├── WidgetUpdater           Schnittstelle: alle Widgets neu zeichnen
 │   └── MidnightUpdateScheduler Schnittstelle: Mitternachtsalarm planen/entfernen
 ├── data/
-│   ├── WidgetConfigRepository          Schnittstelle: Lesen/Schreiben pro Widget-ID
+│   ├── WidgetConfigRepository          Schnittstelle: Beobachten/Schreiben pro Widget-ID
 │   └── DataStoreWidgetConfigRepository Implementierung, Preferences DataStore
 ├── widget/
 │   ├── DaysCounterWidget                    GlanceAppWidget
@@ -99,7 +99,9 @@ com.pimorazelvanto.dayscounter
 ```
 
 Die Zeitquelle `Clock` wird injiziert, damit Randfälle (Vortag 23:55, Mitternacht,
-Zeitzonenwechsel) in Tests mit festen Werten geprüft werden können.
+Zeitzonenwechsel) in Tests mit festen Werten geprüft werden können. Neben `today()` liefert
+sie mit `days()` den Tag als beobachtbaren Strom; `dateChanged()` meldet ihr, dass sie ihn
+neu lesen muss (siehe Abschnitt 7).
 
 ## 5. Domänenlogik
 
@@ -160,7 +162,8 @@ Ein Preferences-DataStore der App (Datei `widget_configs`), Schlüssel pro Widge
 | `color_<id>` | String | Enum-Name aus `HeaderColor` |
 
 `WidgetConfigRepository` liefert `WidgetConfig` oder `null`, wenn ein Schlüssel fehlt oder
-ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand.
+ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand. Gelesen wird als
+Strom (`observe`), der bei jeder Änderung erneut liefert; `load` ist dessen erster Wert.
 
 Beim Entfernen eines Widgets (`onDeleted`) löscht das Repository die drei Schlüssel. Meldet
 `AppWidgetManager` danach keine Widgets dieser App mehr, wird der Mitternachtsalarm abgemeldet.
@@ -185,15 +188,25 @@ Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant
 ### Zeitänderungen
 
 `DateChangeReceiver` reagiert auf den Alarm sowie `TIMEZONE_CHANGED`, `TIME_CHANGED`,
-`BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`. In allen Fällen: alle Widgets aktualisieren und
-den Alarm neu planen. Diese Broadcasts sind von den Implicit-Broadcast-Beschränkungen
+`BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`. In allen Fällen: dem `Clock` die Datumsänderung
+melden, alle Widgets aktualisieren und den Alarm neu planen. Diese Broadcasts sind von den Implicit-Broadcast-Beschränkungen
 ausgenommen und werden im Manifest registriert. Für `BOOT_COMPLETED` wird
 `RECEIVE_BOOT_COMPLETED` deklariert.
 
+### Laufende Komposition
+
+Glance hält eine Komposition nach einem Update noch etwa eine Minute offen und ruft
+`provideGlance` für weitere Updates in dieser Zeit **nicht** erneut auf; `update`/`updateAll`
+lassen die laufende Komposition nur neu zeichnen. Vor `provideContent` gelesene Werte könnten
+sich deshalb nie mehr ändern. `DaysCounterWidget` beobachtet seinen Zustand darum innerhalb
+der Komposition: Konfiguration über `WidgetConfigRepository.observe`, Datum über
+`Clock.days()`. Sonst überlebt der Platzhalter eines frisch platzierten Widgets dessen erstes
+Speichern, und die Zahl von gestern überlebt Mitternacht.
+
 ### Absicherung
 
-Das Widget berechnet den Wert bei jedem Rendern aus dem aktuellen Datum. Ein einmal
-verpasster Alarm wird beim nächsten Anlass korrigiert.
+Das Widget berechnet den Wert aus dem beobachteten Datum. Ein einmal verpasster Alarm wird
+beim nächsten Anlass korrigiert.
 
 ## 8. Widget-Darstellung
 
@@ -298,7 +311,8 @@ Vollständige Abdeckung von `domain`:
   → `null`, korruptes Datum → `null`.
 - `MidnightUpdateScheduler`: genau ein Alarm auf nächste Mitternacht in Gerätezeitzone,
   Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
-- `DateChangeReceiver`: jeder behandelte Broadcast löst Update und Neuplanung aus.
+- `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst
+  Update und Neuplanung aus.
 - Glance-Layout mit `glance-testing`: Titel, Zahl, Farbe für gegebene Konfiguration;
   Platzhalter-Zustand.
 
@@ -311,6 +325,9 @@ Vollständige Abdeckung von `domain`:
 - Smoke-Test: Widget-Composable über `GlanceRemoteViews` zu `RemoteViews` übersetzen und
   in eine echte View-Hierarchie inflaten; rendert ohne Absturz, Zahl und Titel sind als
   `TextView` vorhanden. `AppWidgetHost` würde eine Shell-Berechtigung im Test erfordern.
+- Laufende Komposition: über `GlanceAppWidget.runComposition` eine echte Glance-Session
+  starten und prüfen, dass sie nach dem Speichern einer Konfiguration und nach einem
+  Tageswechsel neue `RemoteViews` liefert (Platzhalter → „1“ → „0“).
 
 ### Statische Analyse (im Gradle-Task `check`)
 

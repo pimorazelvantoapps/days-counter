@@ -29,9 +29,9 @@ import com.pimorazelvanto.dayscounter.DaysCounterApplication
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
+import com.pimorazelvanto.dayscounter.testsupport.ControlledClock
 import com.pimorazelvanto.dayscounter.testsupport.FakeAppContainer
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
-import com.pimorazelvanto.dayscounter.testsupport.FixedClock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -58,7 +58,7 @@ class ConfigActivityTest {
         context = ApplicationProvider.getApplicationContext()
         val application = context as DaysCounterApplication
         applicationContainer = application.container
-        application.container = FakeAppContainer(clock = FixedClock(today), repository = repository)
+        application.container = FakeAppContainer(clock = ControlledClock(today), repository = repository)
     }
 
     /**

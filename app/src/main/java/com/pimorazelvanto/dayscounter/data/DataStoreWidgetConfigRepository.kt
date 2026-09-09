@@ -6,24 +6,18 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 class DataStoreWidgetConfigRepository(
     private val dataStore: DataStore<Preferences>,
 ) : WidgetConfigRepository {
-    override suspend fun load(appWidgetId: Int): WidgetConfig? {
-        val preferences = dataStore.data.first()
+    override fun observe(appWidgetId: Int): Flow<WidgetConfig?> {
         val keys = Keys(appWidgetId)
-        val title = preferences[keys.title]
-        val targetDate = preferences[keys.targetDate]?.let(::parseDateOrNull)
-        val color = preferences[keys.color]?.let(HeaderColor::fromName)
-        return if (title != null && targetDate != null && color != null) {
-            WidgetConfig(title, targetDate, color)
-        } else {
-            null
-        }
+        return dataStore.data.map { it.readConfig(keys) }.distinctUntilChanged()
     }
 
     override suspend fun save(
@@ -44,6 +38,17 @@ class DataStoreWidgetConfigRepository(
             preferences.remove(keys.title)
             preferences.remove(keys.targetDate)
             preferences.remove(keys.color)
+        }
+    }
+
+    private fun Preferences.readConfig(keys: Keys): WidgetConfig? {
+        val title = this[keys.title]
+        val targetDate = this[keys.targetDate]?.let(::parseDateOrNull)
+        val color = this[keys.color]?.let(HeaderColor::fromName)
+        return if (title != null && targetDate != null && color != null) {
+            WidgetConfig(title, targetDate, color)
+        } else {
+            null
         }
     }
 

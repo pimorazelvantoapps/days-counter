@@ -33,8 +33,12 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   brauchen und `widget` bereits von `config` abhängt: eine Implementierung in `config` oder
   `widget` selbst würde einen Package-Zyklus erzeugen.
 - Zeit nie direkt über `LocalDate.now()` lesen, immer über die `Clock`-Schnittstelle.
+- Der Widget-Inhalt wird innerhalb der Komposition beobachtet (`WidgetConfigRepository.observe`,
+  `Clock.days()`), nicht vor `provideContent` einmalig gelesen. Glance ruft `provideGlance` für
+  Updates an eine noch laufende Komposition nicht erneut auf; einmal gelesene Werte erreichen das
+  Widget dann nie. `DateChangeReceiver` meldet dazu jede Datumsänderung über `Clock.dateChanged()`.
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
-- Test-Fakes und `FixedClock` liegen in `app/src/sharedTest/java` und werden von Unit- und
+- Test-Fakes und `ControlledClock` liegen in `app/src/sharedTest/java` und werden von Unit- und
   Instrumentation-Tests gemeinsam genutzt. Keine zweite Kopie anlegen.
 - Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
   tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.

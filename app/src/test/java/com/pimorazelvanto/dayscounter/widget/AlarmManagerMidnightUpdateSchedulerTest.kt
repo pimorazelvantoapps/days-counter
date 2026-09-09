@@ -3,7 +3,7 @@ package com.pimorazelvanto.dayscounter.widget
 import android.app.AlarmManager
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.pimorazelvanto.dayscounter.testsupport.FixedClock
+import com.pimorazelvanto.dayscounter.testsupport.ControlledClock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -28,7 +28,7 @@ class AlarmManagerMidnightUpdateSchedulerTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         alarmManager = context.getSystemService(AlarmManager::class.java)
-        scheduler = AlarmManagerMidnightUpdateScheduler(context, alarmManager, FixedClock(today, zone))
+        scheduler = AlarmManagerMidnightUpdateScheduler(context, alarmManager, ControlledClock(today, zone))
     }
 
     @Test
