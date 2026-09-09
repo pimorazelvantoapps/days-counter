@@ -189,19 +189,16 @@ Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant
 
 `DateChangeReceiver` reagiert auf den Alarm sowie `TIMEZONE_CHANGED`, `TIME_CHANGED`,
 `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`. In allen Fällen: dem `Clock` die Datumsänderung
-melden, alle Widgets aktualisieren und den Alarm neu planen. Diese Broadcasts sind von den Implicit-Broadcast-Beschränkungen
-ausgenommen und werden im Manifest registriert. Für `BOOT_COMPLETED` wird
-`RECEIVE_BOOT_COMPLETED` deklariert.
+melden, alle Widgets aktualisieren und den Alarm neu planen. Diese Broadcasts sind von den
+Implicit-Broadcast-Beschränkungen ausgenommen und werden im Manifest registriert. Für
+`BOOT_COMPLETED` wird `RECEIVE_BOOT_COMPLETED` deklariert.
 
 ### Laufende Komposition
 
-Glance hält eine Komposition nach einem Update noch etwa eine Minute offen und ruft
-`provideGlance` für weitere Updates in dieser Zeit **nicht** erneut auf; `update`/`updateAll`
-lassen die laufende Komposition nur neu zeichnen. Vor `provideContent` gelesene Werte könnten
-sich deshalb nie mehr ändern. `DaysCounterWidget` beobachtet seinen Zustand darum innerhalb
-der Komposition: Konfiguration über `WidgetConfigRepository.observe`, Datum über
-`Clock.days()`. Sonst überlebt der Platzhalter eines frisch platzierten Widgets dessen erstes
-Speichern, und die Zahl von gestern überlebt Mitternacht.
+`DaysCounterWidget` beobachtet seinen Zustand innerhalb der Komposition, Konfiguration über
+`WidgetConfigRepository.observe` und Datum über `Clock.days()`, weil Glance `provideGlance` für
+Updates an eine noch laufende Komposition nicht erneut aufruft. Ausführliche Begründung im
+Docblock von `DaysCounterWidget.provideGlance`.
 
 ### Absicherung
 

@@ -34,12 +34,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
-
-private const val COMPOSITION_TIMEOUT_MILLIS = 15_000L
 
 @OptIn(ExperimentalGlanceRemoteViewsApi::class, ExperimentalGlanceApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -50,19 +47,11 @@ class DaysCounterWidgetRenderTest {
     private val tomorrow = today.plusDays(1)
     private val clock = ControlledClock(today)
     private val repository = FakeWidgetConfigRepository()
-    private lateinit var applicationContainer: AppContainer
-
-    /** The container is process-global, so it is swapped for the fakes and restored afterwards. */
-    @Before
-    fun setUp() {
-        val application = context as DaysCounterApplication
-        applicationContainer = application.container
-        application.container = FakeAppContainer(clock = clock, repository = repository)
-    }
+    private var applicationContainer: AppContainer? = null
 
     @After
     fun tearDown() {
-        (context as DaysCounterApplication).container = applicationContainer
+        applicationContainer?.let { (context as DaysCounterApplication).container = it }
     }
 
     @Test
@@ -89,15 +78,12 @@ class DaysCounterWidgetRenderTest {
             assertTrue("texts were $texts", defaultTitle() in texts && WidgetUiState.PLACEHOLDER_TEXT in texts)
         }
 
-    /**
-     * Glance keeps a composition running for a while after an update and does not re-run
-     * `provideGlance` for updates that arrive meanwhile, so a widget whose content was read once
-     * would stay on the value it was composed with: the placeholder of a freshly placed widget
-     * survives its first save, and yesterday's number survives midnight.
-     */
+    /** Drives a save and a day boundary from inside the collection of one running composition. */
     @Test
     fun runningCompositionFollowsASaveAndTheNextDay() =
         runBlocking {
+            installFakeContainer()
+            val config = WidgetConfig("Urlaub", tomorrow, HeaderColor.BLUE)
             val renderings = mutableListOf<List<String>>()
 
             withTimeoutOrNull(COMPOSITION_TIMEOUT_MILLIS) {
@@ -105,7 +91,7 @@ class DaysCounterWidgetRenderTest {
                     renderings += inflateTexts(views)
                     when (index) {
                         0 -> {
-                            repository.save(observedAppWidgetId(), WidgetConfig("Urlaub", tomorrow, HeaderColor.BLUE))
+                            repository.save(observedAppWidgetId(), config)
                         }
 
                         1 -> {
@@ -125,6 +111,13 @@ class DaysCounterWidgetRenderTest {
                 renderings,
             )
         }
+
+    /** The container is process-global, so [tearDown] puts the real one back. */
+    private fun installFakeContainer() {
+        val application = context as DaysCounterApplication
+        applicationContainer = application.container
+        application.container = FakeAppContainer(clock = clock, repository = repository)
+    }
 
     private fun defaultTitle(): String = context.getString(R.string.default_title)
 
@@ -150,5 +143,6 @@ class DaysCounterWidgetRenderTest {
 
     private companion object {
         const val EXPECTED_RENDERINGS = 3
+        const val COMPOSITION_TIMEOUT_MILLIS = 15_000L
     }
 }

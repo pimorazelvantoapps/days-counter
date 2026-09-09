@@ -9,11 +9,7 @@ interface Clock {
 
     fun zone(): ZoneId
 
-    /**
-     * Emits the current day on collection and again after each [dateChanged] that lands on another
-     * day. A widget composition outlives the update that started it, so it has to observe the day
-     * instead of reading it once.
-     */
+    /** Emits the current day, and again after each [dateChanged] that lands on another day. */
     fun days(): Flow<LocalDate>
 
     /** Reports that the system date may have moved, so that [days] reads it again. */
