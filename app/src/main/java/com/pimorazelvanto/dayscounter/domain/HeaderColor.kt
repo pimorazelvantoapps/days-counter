@@ -19,6 +19,8 @@ enum class HeaderColor(
     ;
 
     companion object {
+        // Changing this also requires updating @color/widget_preview_header in
+        // res/values/colors.xml, which restates it for the launcher's static widget preview.
         val DEFAULT: HeaderColor = RED
 
         fun fromName(name: String): HeaderColor? = entries.firstOrNull { it.name == name }

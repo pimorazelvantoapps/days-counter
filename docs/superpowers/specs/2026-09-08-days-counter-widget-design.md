@@ -38,10 +38,10 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
 | Punkt | Entscheidung |
 |---|---|
 | Sprache | Kotlin |
-| minSdk / targetSdk | 33 / aktuelles stabiles SDK |
+| minSdk / compileSdk / targetSdk | 33 / 37 / 37 |
 | Widget-UI | Jetpack Glance |
 | Konfigurations-UI | Jetpack Compose, Material 3 |
-| Persistenz | Glance Preferences DataStore pro Widget-ID |
+| Persistenz | App-weites Preferences DataStore, Schlüssel suffigiert je Widget-ID (nicht Glance-eigen, siehe Abschnitt 6) |
 | Zeitplanung | AlarmManager, exakter Alarm, Berechtigung `USE_EXACT_ALARM` |
 | Build | Gradle Kotlin DSL, Version Catalog |
 | Coding Standard | Kotlin Official Code Style, durchgesetzt per ktlint |
@@ -53,8 +53,16 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
 
 Ein Gradle-Modul `app`. Trennung über Packages mit fester Abhängigkeitsrichtung:
 `domain` kennt nichts. `data` kennt `domain`. `widget` und `config` kennen `domain` und
-`data`, aber nicht einander. Konfiguration und Widget kommunizieren nur über den Speicher:
-`config` schreibt und stößt ein Widget-Update an, `widget` liest.
+`data`, aber nicht einander. Einzige Ausnahme: `widget` ruft `ConfigActivity.createIntent`
+auf, um den Tipp auf ein Widget an dessen Konfiguration zu binden. Konfiguration und Widget
+kommunizieren sonst nur über den Speicher: `config` schreibt und stößt ein Widget-Update an,
+`widget` liest.
+
+`Clock`, `WidgetUpdater` und `MidnightUpdateScheduler` sind Schnittstellen in `domain`.
+`WidgetUpdater` und `MidnightUpdateScheduler` werden sowohl von `config` (zum Abschluss des
+Speicherns) als auch von `widget` gebraucht; da `widget` bereits von `config` abhängt, würde
+eine Implementierung in `config` einen Package-Zyklus erzeugen. Die Implementierungen
+`GlanceWidgetUpdater` und `AlarmManagerMidnightUpdateScheduler` liegen deshalb in `widget`.
 
 ```
 com.pimorazelvanto.dayscounter
@@ -67,16 +75,21 @@ com.pimorazelvanto.dayscounter
 │   ├── DisplayValue            Sealed: Days(n) | Reached | Passed, plus Anzeigetext
 │   ├── DigitSizeTier           Schriftgrößen-Stufe nach Ziffernzahl
 │   ├── TargetDateValidator     (today, candidate) -> Valid | NotInFuture
-│   └── HeaderColor             Enum der 12 Farben mit ARGB-Wert
-├── data/
+│   ├── HeaderColor             Enum der 12 Farben mit ARGB-Wert
 │   ├── WidgetConfig            title, targetDate, color
-│   └── WidgetConfigRepository  Lesen/Schreiben pro Widget-ID
+│   ├── WidgetUiState           Anzeigezustand, gemeinsam für `widget` und `config`
+│   ├── WidgetUpdater           Schnittstelle: alle Widgets neu zeichnen
+│   └── MidnightUpdateScheduler Schnittstelle: Mitternachtsalarm planen/entfernen
+├── data/
+│   ├── WidgetConfigRepository          Schnittstelle: Lesen/Schreiben pro Widget-ID
+│   └── DataStoreWidgetConfigRepository Implementierung, Preferences DataStore
 ├── widget/
-│   ├── DaysCounterWidget          GlanceAppWidget
-│   ├── DaysCounterWidgetReceiver  GlanceAppWidgetReceiver, Lifecycle
-│   ├── MidnightUpdateScheduler    Plant/entfernt den Mitternachtsalarm
-│   └── DateChangeReceiver         Alarm, TIMEZONE_CHANGED, TIME_CHANGED,
-│                                  BOOT_COMPLETED, MY_PACKAGE_REPLACED
+│   ├── DaysCounterWidget                    GlanceAppWidget
+│   ├── DaysCounterWidgetReceiver            GlanceAppWidgetReceiver, Lifecycle
+│   ├── GlanceWidgetUpdater                 Implementierung von WidgetUpdater
+│   ├── AlarmManagerMidnightUpdateScheduler Implementierung von MidnightUpdateScheduler
+│   └── DateChangeReceiver                  Alarm, TIMEZONE_CHANGED, TIME_CHANGED,
+│                                            BOOT_COMPLETED, MY_PACKAGE_REPLACED
 └── config/
     ├── ConfigActivity          Einstieg beim Platzieren und bei Tipp
     ├── ConfigViewModel         Zustand, Validierung, Speichern
@@ -275,12 +288,14 @@ Vollständige Abdeckung von `domain`:
 - `TargetDateValidator`: heute ungültig, morgen gültig, gestern ungültig.
 - `HeaderColor`: 12 Einträge, eindeutige Namen, Rundreise Name→Enum→Name, unbekannter
   Name liefert Fehler statt Absturz.
+- `ConfigViewModel`: Startzustand, Laden, `isValid`, Speichern; gefälschte `Clock` sowie
+  gefälschtes Repository, Updater und Scheduler aus `app/src/sharedTest/java`, kein Android-
+  Bezug nötig.
 
 ### Funktionale Tests (JUnit 4 + Robolectric)
 
 - `WidgetConfigRepository`: Schreiben/Lesen, Isolation zwischen IDs, fehlende Schlüssel
   → `null`, korruptes Datum → `null`.
-- `ConfigViewModel`: Startzustand, Laden, `isValid`, Speichern; gefälschte `Clock`.
 - `MidnightUpdateScheduler`: genau ein Alarm auf nächste Mitternacht in Gerätezeitzone,
   Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
 - `DateChangeReceiver`: jeder behandelte Broadcast löst Update und Neuplanung aus.

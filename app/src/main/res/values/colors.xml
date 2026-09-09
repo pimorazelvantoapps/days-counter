@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- The launcher adaptive icon's background. Independent of HeaderColor: this is the app's
+         own brand colour, not a widget header. It happens to equal HeaderColor.RED today; that
+         is coincidence, not a constraint, and it may diverge from HeaderColor.RED in future. -->
     <color name="launcher_background">#D32F2F</color>
     <color name="widget_sheet_background">#FAFAFA</color>
     <color name="widget_sheet_text">#212121</color>
     <color name="widget_header_text">#FFFFFF</color>
+    <!-- res/layout/widget_preview.xml, the static launcher preview of an unconfigured widget,
+         shows the header colour a fresh widget gets: HeaderColor.DEFAULT (RED). XML cannot read
+         that enum, so its ARGB is restated here. KEEP IN SYNC WITH HeaderColor.DEFAULT. -->
     <color name="widget_preview_header">#D32F2F</color>
     <!-- Read by config/WidgetPreview.kt; mirrors PLACEHOLDER_TEXT_COLOR in
          widget/DaysCounterWidgetContent.kt, which cannot read a colour resource. That file's

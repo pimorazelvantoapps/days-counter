@@ -6,7 +6,7 @@ Anweisungen für Coding-Agents in diesem Projekt. Für menschliche Leser gilt `R
 
 Android-Homescreen-Widget (1x1), das die Tage bis zu einem Zieldatum zählt.
 Design und Anforderungen: `docs/superpowers/specs/2026-09-08-days-counter-widget-design.md`.
-Kotlin, minSdk 33, Jetpack Glance (Widget), Jetpack Compose (Konfiguration).
+Kotlin, minSdk 33, compileSdk/targetSdk 37, Jetpack Glance (Widget), Jetpack Compose (Konfiguration).
 
 ## Befehle
 
@@ -24,9 +24,18 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 
 - Kotlin Official Code Style, durchgesetzt per ktlint.
 - Abhängigkeitsrichtung der Packages einhalten: `domain` kennt nichts; `data` kennt
-  `domain`; `widget` und `config` kennen `domain` und `data`, aber nicht einander.
+  `domain`; `widget` und `config` kennen `domain` und `data`, aber nicht einander. Einzige
+  Ausnahme: `widget` ruft `ConfigActivity.createIntent` auf, um den Tipp auf ein Widget an
+  dessen Konfiguration zu binden.
+- `WidgetUpdater` und `MidnightUpdateScheduler` sind Schnittstellen in `domain` (wie `Clock`),
+  ihre Implementierungen `GlanceWidgetUpdater` und `AlarmManagerMidnightUpdateScheduler` liegen
+  in `widget`, weil sowohl `config` (zum Abschluss des Speicherns) als auch `widget` sie
+  brauchen und `widget` bereits von `config` abhängt: eine Implementierung in `config` oder
+  `widget` selbst würde einen Package-Zyklus erzeugen.
 - Zeit nie direkt über `LocalDate.now()` lesen, immer über die `Clock`-Schnittstelle.
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
+- Test-Fakes und `FixedClock` liegen in `app/src/sharedTest/java` und werden von Unit- und
+  Instrumentation-Tests gemeinsam genutzt. Keine zweite Kopie anlegen.
 - Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
   tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.
 
