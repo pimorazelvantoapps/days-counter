@@ -50,8 +50,11 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
 - Lints `UnusedResources` ist ein Fehler: eine Ressource erst anlegen, wenn sie im selben
   Commit auch verwendet wird.
-- Test-Fakes und `ControlledClock` liegen in `app/src/sharedTest/java` und werden von Unit- und
-  Instrumentation-Tests gemeinsam genutzt. Keine zweite Kopie anlegen.
+- Test-Fakes, `ControlledClock` und `PinnedLocaleRule` liegen in `app/src/sharedTest/java` und
+  werden von Unit- und Instrumentation-Tests gemeinsam genutzt. Keine zweite Kopie anlegen.
+- Instrumentation-Tests, die auf UI-Texte matchen, brauchen `PinnedLocaleRule`. Materials
+  eigene Zeichenketten sind interne Ressourcen und lassen sich nicht wiederverwenden: Lints
+  `PrivateResource` schlägt an, und das ist hier ein Fehler.
 - Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
   tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.
 - Vor `connectedCheck` die Animationen abschalten, sonst sind die Compose-Tests flaky:
