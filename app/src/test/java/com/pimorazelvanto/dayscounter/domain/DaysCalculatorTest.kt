@@ -8,8 +8,8 @@ class DaysCalculatorTest {
     private val today = LocalDate.of(2026, 9, 8)
 
     @Test
-    fun `target tomorrow counts as one full day`() {
-        assertEquals(DisplayValue.Days(1), DaysCalculator.calculate(today, today.plusDays(1)))
+    fun `target tomorrow counts as one full remaining day`() {
+        assertEquals(DisplayValue.Remaining(1), DaysCalculator.calculate(today, today.plusDays(1)))
     }
 
     @Test
@@ -18,25 +18,30 @@ class DaysCalculatorTest {
     }
 
     @Test
-    fun `target yesterday is passed`() {
-        assertEquals(DisplayValue.Passed, DaysCalculator.calculate(today, today.minusDays(1)))
+    fun `target yesterday counts as one elapsed day`() {
+        assertEquals(DisplayValue.Elapsed(1), DaysCalculator.calculate(today, today.minusDays(1)))
     }
 
     @Test
     fun `counts across year boundary`() {
         val newYear = LocalDate.of(2027, 1, 1)
-        assertEquals(DisplayValue.Days(115), DaysCalculator.calculate(today, newYear))
+        assertEquals(DisplayValue.Remaining(115), DaysCalculator.calculate(today, newYear))
     }
 
     @Test
     fun `counts leap day when crossing february 29`() {
         val beforeLeapDay = LocalDate.of(2028, 2, 28)
         val afterLeapDay = LocalDate.of(2028, 3, 1)
-        assertEquals(DisplayValue.Days(2), DaysCalculator.calculate(beforeLeapDay, afterLeapDay))
+        assertEquals(DisplayValue.Remaining(2), DaysCalculator.calculate(beforeLeapDay, afterLeapDay))
     }
 
     @Test
-    fun `counts distances of several years`() {
-        assertEquals(DisplayValue.Days(3653), DaysCalculator.calculate(today, today.plusYears(10)))
+    fun `counts distances of several years remaining`() {
+        assertEquals(DisplayValue.Remaining(3653), DaysCalculator.calculate(today, today.plusYears(10)))
+    }
+
+    @Test
+    fun `counts distances of several years elapsed`() {
+        assertEquals(DisplayValue.Elapsed(3652), DaysCalculator.calculate(today, today.minusYears(10)))
     }
 }

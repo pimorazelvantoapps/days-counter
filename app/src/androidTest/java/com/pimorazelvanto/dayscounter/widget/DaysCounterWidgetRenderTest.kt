@@ -57,7 +57,7 @@ class DaysCounterWidgetRenderTest {
     @Test
     fun configuredContentInflatesWithTitleAndValue() =
         runBlocking {
-            val state = WidgetUiState("Urlaub", "42", DigitSizeTier.LARGE, HeaderColor.BLUE, isPlaceholder = false)
+            val state = WidgetUiState("Urlaub", "42", DigitSizeTier.ONE_DIGIT, HeaderColor.BLUE, isPlaceholder = false)
             val result =
                 GlanceRemoteViews().compose(context, widgetSize) {
                     DaysCounterWidgetContent(state, actionStartActivity(ConfigActivity.createIntent(context, 1)))

@@ -3,10 +3,11 @@
      DaysCounterWidgetContent.kt in view XML. @dimen/widget_header_height and
      @color/widget_sheet_background are shared with the composable and cannot drift.
      KEEP THE REST IN SYNC WITH THAT FILE:
-       @color/widget_header_text          <-> HEADER_TEXT_COLOR
-       @color/widget_sheet_text           <-> SHEET_TEXT_COLOR (plus its values-night override)
-       @dimen/widget_title_text_size      <-> TITLE_TEXT_SIZE
-       @dimen/widget_value_text_size_large <-> VALUE_TEXT_SIZE_LARGE
+       @color/widget_header_text              <-> HEADER_TEXT_COLOR
+       @color/widget_sheet_text               <-> SHEET_TEXT_COLOR (plus its values-night override)
+       @dimen/widget_title_text_size          <-> com.pimorazelvanto.dayscounter.ui.TextSizes.TITLE
+       @dimen/widget_value_text_size_two_digits <-> TextSizes.value(DigitSizeTier.TWO_DIGITS), for
+                                                     the two-digit @string/widget_preview_value
 
      Overdraw: this layout is only ever inflated as an app-widget preview, never under an
      activity theme, so the theme background lint infers is never actually painted. -->
@@ -34,6 +35,6 @@
         android:gravity="center"
         android:text="@string/widget_preview_value"
         android:textColor="@color/widget_sheet_text"
-        android:textSize="@dimen/widget_value_text_size_large"
+        android:textSize="@dimen/widget_value_text_size_two_digits"
         android:textStyle="bold" />
 </LinearLayout>

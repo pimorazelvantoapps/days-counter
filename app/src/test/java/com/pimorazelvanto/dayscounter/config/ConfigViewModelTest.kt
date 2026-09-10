@@ -131,9 +131,8 @@ class ConfigViewModelTest {
     }
 
     @Test
-    fun `save without valid date does nothing`() {
+    fun `save without a chosen date does nothing`() {
         val vm = viewModel()
-        vm.onTargetDateChanged(today)
 
         vm.save()
 
@@ -141,6 +140,18 @@ class ConfigViewModelTest {
         assertEquals(0, widgetUpdater.updateCount)
         assertEquals(0, scheduler.scheduleCount)
         assertEquals(SaveState.Idle, vm.uiState.value.saveState)
+    }
+
+    @Test
+    fun `save persists a past target date`() {
+        val vm = viewModel()
+        vm.onTargetDateChanged(today.minusDays(5))
+
+        vm.save()
+
+        assertEquals(WidgetConfig("Tage", today.minusDays(5), HeaderColor.DEFAULT), repository.saved[7])
+        assertEquals(1, widgetUpdater.updateCount)
+        assertEquals(SaveState.Saved, vm.uiState.value.saveState)
     }
 
     @Test
@@ -177,15 +188,16 @@ class ConfigViewModelTest {
     }
 
     @Test
-    fun `refreshToday invalidates a date that became today`() {
+    fun `refreshToday updates the preview to follow the new day`() {
         val clock = ControlledClock(today)
         val vm = ConfigViewModel(7, repository, clock, widgetUpdater, scheduler, "Tage")
         vm.onTargetDateChanged(today.plusDays(1))
-        assertTrue(vm.uiState.value.isValid)
+        assertEquals("1", vm.uiState.value.preview.valueText)
 
         clock.moveTo(today.plusDays(1))
         vm.refreshToday()
 
-        assertFalse(vm.uiState.value.isValid)
+        assertEquals("0", vm.uiState.value.preview.valueText)
+        assertTrue(vm.uiState.value.isValid)
     }
 }

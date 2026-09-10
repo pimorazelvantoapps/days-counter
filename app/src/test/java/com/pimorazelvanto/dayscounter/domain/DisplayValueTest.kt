@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test
 
 class DisplayValueTest {
     @Test
-    fun `days render as plain number`() {
-        assertEquals("42", DisplayValue.Days(42).text)
+    fun `remaining days render as plain number`() {
+        assertEquals("42", DisplayValue.Remaining(42).text)
     }
 
     @Test
@@ -15,7 +15,7 @@ class DisplayValueTest {
     }
 
     @Test
-    fun `passed renders as an ascii hyphen`() {
-        assertEquals("\u002D", DisplayValue.Passed.text)
+    fun `elapsed days render as plain number`() {
+        assertEquals("42", DisplayValue.Elapsed(42).text)
     }
 }

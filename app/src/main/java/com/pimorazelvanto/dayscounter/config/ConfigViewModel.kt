@@ -52,6 +52,10 @@ class ConfigViewModel(
         mutableUiState.update { it.copy(color = color) }
     }
 
+    /**
+     * Re-reads today's date so the live preview does not go stale if the configuration screen
+     * sits open across midnight; the screen does not observe the clock the way the widget does.
+     */
     fun refreshToday() {
         mutableUiState.update { it.copy(today = clock.today()) }
     }
@@ -59,8 +63,7 @@ class ConfigViewModel(
     fun save() {
         val state = uiState.value
         if (state.saveState == SaveState.Saving) return
-        val targetDate = state.targetDate
-        if (!state.isValid || targetDate == null) return
+        val targetDate = state.targetDate ?: return
         mutableUiState.update { it.copy(saveState = SaveState.Saving) }
         viewModelScope.launch {
             val result = persist(WidgetConfig(state.effectiveTitle, targetDate, state.color))

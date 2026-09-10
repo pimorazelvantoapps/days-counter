@@ -2,5 +2,5 @@
 <resources>
     <dimen name="widget_header_height">18dp</dimen>
     <dimen name="widget_title_text_size">10sp</dimen>
-    <dimen name="widget_value_text_size_large">22sp</dimen>
+    <dimen name="widget_value_text_size_two_digits">21sp</dimen>
 </resources>

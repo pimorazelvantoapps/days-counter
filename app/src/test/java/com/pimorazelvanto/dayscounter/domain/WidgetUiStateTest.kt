@@ -2,7 +2,6 @@ package com.pimorazelvanto.dayscounter.domain
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -17,43 +16,43 @@ class WidgetUiStateTest {
         val state = WidgetUiState.from(config, today, defaultTitle = "Tage")
 
         assertEquals(
-            WidgetUiState("Urlaub", "42", DigitSizeTier.LARGE, HeaderColor.BLUE, isPlaceholder = false),
+            WidgetUiState("Urlaub", "42", DigitSizeTier.TWO_DIGITS, HeaderColor.BLUE, isPlaceholder = false),
             state,
         )
     }
 
     @Test
-    fun `passed target shows hyphen`() {
-        val config = WidgetConfig("Urlaub", today.minusDays(1), HeaderColor.BLUE)
+    fun `elapsed target shows its day count`() {
+        val config = WidgetConfig("Umzug", today.minusDays(1), HeaderColor.BLUE)
 
-        assertEquals("-", WidgetUiState.from(config, today, "Tage").valueText)
+        assertEquals("1", WidgetUiState.from(config, today, "Tage").valueText)
     }
 
     @Test
-    fun `target day itself shows zero on the large tier`() {
+    fun `target day itself shows zero on the one-digit tier`() {
         val config = WidgetConfig("Umzug", today, HeaderColor.GREEN)
 
         val state = WidgetUiState.from(config, today, "Tage")
 
         assertEquals("0", state.valueText)
-        assertEquals(DigitSizeTier.LARGE, state.sizeTier)
+        assertEquals(DigitSizeTier.ONE_DIGIT, state.sizeTier)
     }
 
     @Test
-    fun `three digit values use medium tier`() {
+    fun `three digit values use three-digit tier`() {
         val config = WidgetConfig("Abschluss", today.plusDays(365), HeaderColor.TEAL)
 
         val state = WidgetUiState.from(config, today, "Tage")
 
         assertEquals("365", state.valueText)
-        assertEquals(DigitSizeTier.MEDIUM, state.sizeTier)
+        assertEquals(DigitSizeTier.THREE_DIGITS, state.sizeTier)
     }
 
     @Test
-    fun `four digit values use small tier`() {
+    fun `four digit values use four-digit tier`() {
         val config = WidgetConfig("Rente", today.plusDays(4000), HeaderColor.GREY)
 
-        assertEquals(DigitSizeTier.SMALL, WidgetUiState.from(config, today, "Tage").sizeTier)
+        assertEquals(DigitSizeTier.FOUR_DIGITS, WidgetUiState.from(config, today, "Tage").sizeTier)
     }
 
     @Test
@@ -64,13 +63,12 @@ class WidgetUiStateTest {
         assertEquals("Tage", state.title)
         assertEquals(WidgetUiState.PLACEHOLDER_TEXT, state.valueText)
         assertEquals(HeaderColor.DEFAULT, state.color)
-        assertEquals(DigitSizeTier.LARGE, state.sizeTier)
+        assertEquals(DigitSizeTier.ONE_DIGIT, state.sizeTier)
         assertFalse(WidgetUiState.from(WidgetConfig("x", today, HeaderColor.RED), today, "Tage").isPlaceholder)
     }
 
     @Test
-    fun `placeholder is an en dash and not the hyphen of a passed target`() {
-        assertEquals("\u2013", WidgetUiState.PLACEHOLDER_TEXT)
-        assertNotEquals(DisplayValue.Passed.text, WidgetUiState.PLACEHOLDER_TEXT)
+    fun `placeholder is an en dash`() {
+        assertEquals("–", WidgetUiState.PLACEHOLDER_TEXT)
     }
 }

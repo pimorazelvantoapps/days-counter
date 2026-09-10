@@ -15,9 +15,10 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
 
 - 1x1-Widget, nicht skalierbar, beliebig viele Instanzen
 - Pro Instanz: Titel (max. 20 Zeichen), Zieldatum, Header-Farbe aus 12 festen Farben
-- Anzeige: Tage bis zum Ziel, „0“ am Zieltag, „-“ nach dem Zieltag
+- Anzeige: Tage bis zum Ziel oder seit ihm, „0“ am Zieltag; die Richtung (bis/seit) steht
+  allein im Titel, das Blatt zeigt immer eine vorzeichenlose Zahl
 - Angefangene Tage zählen voll: Am Vortag um 23:55 wird „1“ angezeigt
-- Zieldatum bei Eingabe frühestens morgen
+- Zieldatum beliebig, auch in der Vergangenheit
 - Exakte Aktualisierung um Mitternacht, außerdem bei Zeitzonen-/Zeitänderung, Neustart, App-Update
 - Konfigurationsdialog beim Platzieren und bei Tipp auf das Widget
 - Blatt folgt dem Systemthema (hell/dunkel), Header behält gewählte Farbe
@@ -52,9 +53,10 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
 ## 4. Architektur
 
 Ein Gradle-Modul `app`. Trennung über Packages mit fester Abhängigkeitsrichtung:
-`domain` kennt nichts. `data` kennt `domain`. `widget` und `config` kennen `domain` und
-`data`, aber nicht einander. Einzige Ausnahme: `widget` ruft `ConfigActivity.createIntent`
-auf, um den Tipp auf ein Widget an dessen Konfiguration zu binden. Konfiguration und Widget
+`domain` kennt nichts. `data` kennt `domain`. `ui` kennt nur `domain`, für die dort
+gebündelten Compose-Textgrößen. `widget` und `config` kennen `domain`, `data` und `ui`, aber
+nicht einander. Einzige Ausnahme: `widget` ruft `ConfigActivity.createIntent` auf, um den
+Tipp auf ein Widget an dessen Konfiguration zu binden. Konfiguration und Widget
 kommunizieren sonst nur über den Speicher: `config` schreibt und stößt ein Widget-Update an,
 `widget` liest.
 
@@ -72,9 +74,8 @@ com.pimorazelvanto.dayscounter
 │   ├── Clock                   Schnittstelle: today(), days(): Flow<LocalDate>
 │   ├── SystemClock             Produktiv-Implementierung, Gerätezeitzone
 │   ├── DaysCalculator          (today, target) -> DisplayValue
-│   ├── DisplayValue            Sealed: Days(n) | Reached | Passed, plus Anzeigetext
-│   ├── DigitSizeTier           Schriftgrößen-Stufe nach Ziffernzahl
-│   ├── TargetDateValidator     (today, candidate) -> Valid | NotInFuture
+│   ├── DisplayValue            Sealed: Remaining(n) | Reached | Elapsed(n), plus Anzeigetext
+│   ├── DigitSizeTier           Schriftgrößen-Stufe nach Ziffernzahl (ONE_DIGIT … FIVE_OR_MORE_DIGITS)
 │   ├── HeaderColor             Enum der 12 Farben mit ARGB-Wert
 │   ├── WidgetConfig            title, targetDate, color
 │   ├── WidgetUiState           Anzeigezustand, gemeinsam für `widget` und `config`
@@ -83,6 +84,9 @@ com.pimorazelvanto.dayscounter
 ├── data/
 │   ├── WidgetConfigRepository          Schnittstelle: Beobachten/Schreiben pro Widget-ID
 │   └── DataStoreWidgetConfigRepository Implementierung, Preferences DataStore
+├── ui/
+│   └── TextSizes                Titel- und Wertgrößen je DigitSizeTier, geteilt von `widget`
+│                                 und `config`; Compose-`TextUnit` gehört nicht in `domain`
 ├── widget/
 │   ├── DaysCounterWidget                    GlanceAppWidget
 │   ├── DaysCounterWidgetReceiver            GlanceAppWidgetReceiver, Lifecycle
@@ -112,24 +116,33 @@ voll.
 
 ```
 diff = Tage zwischen today und target
-diff > 0  -> Days(diff)     Anzeige: Zahl
-diff == 0 -> Reached        Anzeige: "0"
-diff < 0  -> Passed         Anzeige: "-"
+diff > 0  -> Remaining(diff)  Anzeige: Zahl (Tage bis zum Ziel)
+diff == 0 -> Reached          Anzeige: "0"
+diff < 0  -> Elapsed(-diff)   Anzeige: Zahl (Tage seit dem Ziel)
 ```
+
+Die Richtung (bis/seit) steht bewusst nur im Typ, nicht in der Anzeige: Das Blatt zeigt in
+beiden Fällen eine vorzeichenlose Zahl, ein 1x1-Feld hat keinen Platz für ein Vorzeichen und
+der Titel trägt die Bedeutung („Bis Urlaub“ vs. „Seit Umzug“).
 
 ### Schriftgrößen-Stufe
 
-| Ziffern | Stufe |
-|---|---|
-| 1–2, „0“, „-“ | groß |
-| 3 | mittel |
-| 4 und mehr | klein |
+| Ziffern | Stufe | Größe |
+|---|---|---|
+| 1, „0“, Platzhalter „–“ | `ONE_DIGIT` | 26sp |
+| 2 | `TWO_DIGITS` | 21sp |
+| 3 | `THREE_DIGITS` | 17sp |
+| 4 | `FOUR_DIGITS` | 14sp |
+| 5 und mehr | `FIVE_OR_MORE_DIGITS` | 11sp |
 
-### Validierung
+Die Größen liegen gebündelt in `ui.TextSizes` (Abschnitt 4), geteilt von Glance-Blatt und
+Compose-Vorschau. Die statische Launcher-Vorschau (`res/layout/widget_preview.xml`) kann
+kein Kotlin lesen und führt ihre eigene Kopie der beiden Größen, die sie braucht.
 
-`TargetDateValidator.validate(today, candidate)` liefert `Valid` genau dann, wenn
-`candidate > today`. Gilt nur bei der Eingabe. Gespeicherte Daten dürfen später `Reached`
-und `Passed` werden.
+### Zieldatum
+
+Jedes Datum ist ein gültiges Zieldatum, beliebig weit in Vergangenheit oder Zukunft. Es gibt
+keine Validierung mehr: `ConfigUiState.isValid` bedeutet allein, dass ein Datum gewählt ist.
 
 ### Farben
 
@@ -231,7 +244,8 @@ beim nächsten Anlass korrigiert.
 - Widget-Info: `targetCellWidth=1`, `targetCellHeight=1`, `minWidth/minHeight=40dp`,
   `resizeMode=none`, `configure=ConfigActivity`, kein `updatePeriodMillis`.
 - Tipp auf die gesamte Fläche: `actionStartActivity(ConfigActivity)` mit Widget-ID.
-- Platzhalter ohne Konfiguration: Standardtitel auf rotem Header, „–“ gedämpft im Blatt.
+- Platzhalter ohne Konfiguration: Standardtitel auf rotem Header, gedämpftes En-Dash „–“ im
+  Blatt (bewusst kein Bindestrich, um ihn nicht mit einer Zahl zu verwechseln).
 - Launcher-Vorschau über `previewLayout`, ein kleines XML-Layout, das Header und Zahl mit
   denselben Farb- und Maßressourcen nachbildet. Glance-Composables lassen sich nicht ohne
   platziertes Widget als Vorschau registrieren, und die App hat keinen Startpunkt davor.
@@ -261,7 +275,7 @@ und Statusleiste, dunkles Material-3-Farbschema für den Compose-Inhalt.
 │ │   42   │                     │
 │ └────────┘                     │
 │ Titel      [ Tage          ]   │  TextField, max. 20 Zeichen, Zeichenzähler
-│ Zieldatum  [ 15. März 2027 ]   │  Tipp öffnet Material DatePicker, Untergrenze morgen
+│ Zieldatum  [ 15. März 2027 ]   │  Tipp öffnet Material DatePicker, keine Einschränkung
 │ Farbe      [ ●              ]  │  Kreis in aktueller Farbe, Tipp öffnet ColorPickerDialog
 │         [ Abbrechen ] [ Speichern ] │
 └────────────────────────────────┘
@@ -273,8 +287,10 @@ und Statusleiste, dunkles Material-3-Farbschema für den Compose-Inhalt.
 ### Zustand
 
 `ConfigViewModel`: `title`, `targetDate: LocalDate?` (beim Neuanlegen `null`), `color`.
-Abgeleitet: `isValid` = Datum vorhanden und Validator liefert `Valid`. Speichern-Button
-sonst deaktiviert.
+Abgeleitet: `isValid` = ein Datum ist gewählt, beliebig in Vergangenheit oder Zukunft.
+Speichern-Button sonst deaktiviert. `refreshToday()` (aufgerufen aus `onResume`) liest nur
+das aktuelle Datum neu ein, damit die Live-Vorschau nicht veraltet, falls der Dialog über
+Mitternacht offen bleibt - eine Validierung findet dabei nicht mehr statt.
 
 ### Speichern
 
@@ -283,8 +299,6 @@ Repository schreiben, `DaysCounterWidget.update(widgetId)` anstoßen,
 
 ### Fehlerfälle
 
-- Datum wird bei offenem Dialog über Mitternacht ungültig: Speichern deaktiviert,
-  Hinweistext unter dem Datumsfeld.
 - Schreibfehler im DataStore: Snackbar, Activity bleibt offen.
 - Lesefehler im DataStore: Dialog startet mit den Standardwerten, damit das Widget neu
   eingerichtet werden kann.
@@ -301,16 +315,17 @@ lokalisierten mittleren Format.
 
 Vollständige Abdeckung von `domain`:
 
-- `DaysCalculator`: morgen → 1; heute → Reached; gestern → Passed; große Distanzen;
-  Schaltjahr über 29. Februar; Jahreswechsel.
-- Anzeigetext: `Days(42)` → „42“, `Reached` → „0“, `Passed` → „-“.
-- `DigitSizeTier` für 1, 2, 3, 4, 5 Ziffern sowie „0“ und „-“.
-- `TargetDateValidator`: heute ungültig, morgen gültig, gestern ungültig.
+- `DaysCalculator`: morgen → Remaining(1); heute → Reached; gestern → Elapsed(1); große
+  Distanzen in beide Richtungen; Schaltjahr über 29. Februar; Jahreswechsel.
+- Anzeigetext: `Remaining(42)` → „42“, `Reached` → „0“, `Elapsed(42)` → „42“.
+- `DigitSizeTier` an den Ziffernübergängen 9|10, 99|100, 999|1000, 9999|10000 sowie „0“ und
+  der Platzhalter.
 - `HeaderColor`: 12 Einträge, eindeutige Namen, Rundreise Name→Enum→Name, unbekannter
   Name liefert Fehler statt Absturz.
 - `SystemClock`: `days()` liefert beim Sammeln den heutigen Tag, erneut nach `dateChanged()`
   mit gewechseltem Tag und nicht zweimal für denselben Tag.
-- `ConfigViewModel`: Startzustand, Laden, `isValid`, Speichern; gefälschte `Clock` sowie
+- `ConfigViewModel`: Startzustand, Laden, `isValid` (Datum gewählt, auch in der
+  Vergangenheit), Speichern, `refreshToday()` hält die Vorschau aktuell; gefälschte `Clock` sowie
   gefälschtes Repository, Updater und Scheduler aus `app/src/sharedTest/java`, kein Android-
   Bezug nötig.
 
@@ -331,7 +346,8 @@ Vollständige Abdeckung von `domain`:
 
 ### Instrumentierte Tests (Emulator, Compose UI Test)
 
-- Vollständiger Konfigurationsflow bis `RESULT_OK` und gespeichertem Zustand.
+- Vollständiger Konfigurationsflow bis `RESULT_OK` und gespeichertem Zustand; der Picker
+  bietet dabei auch ein vergangenes Datum an, und das Speichern eines solchen funktioniert.
 - Speichern deaktiviert ohne Datum.
 - Abbrechen → `RESULT_CANCELED`, nichts geschrieben.
 - Farbdialog: 12 Felder sichtbar, Auswahl aktualisiert Vorschau.

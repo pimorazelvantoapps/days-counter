@@ -14,7 +14,7 @@ data class WidgetUiState(
     val isPlaceholder: Boolean,
 ) {
     companion object {
-        /** En dash, deliberately distinct from the hyphen a passed target shows. */
+        /** En dash, used only for an unconfigured widget's placeholder. */
         const val PLACEHOLDER_TEXT = "–"
 
         fun from(
@@ -26,7 +26,7 @@ data class WidgetUiState(
                 return WidgetUiState(
                     title = defaultTitle,
                     valueText = PLACEHOLDER_TEXT,
-                    sizeTier = DigitSizeTier.LARGE,
+                    sizeTier = DigitSizeTier.ONE_DIGIT,
                     color = HeaderColor.DEFAULT,
                     isPlaceholder = true,
                 )

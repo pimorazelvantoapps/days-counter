@@ -1,11 +1,9 @@
 package com.pimorazelvanto.dayscounter.config
 
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
-import com.pimorazelvanto.dayscounter.domain.ValidationResult
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,27 +21,33 @@ class ConfigUiStateTest {
 
     @Test
     fun `without date state is invalid and preview is placeholder`() {
-        assertNull(base.validation)
         assertFalse(base.isValid)
         assertTrue(base.preview.isPlaceholder)
     }
 
     @Test
-    fun `future date is valid and preview shows days`() {
+    fun `future date is valid and preview shows remaining days`() {
         val state = base.copy(targetDate = today.plusDays(3))
 
-        assertEquals(ValidationResult.Valid, state.validation)
         assertTrue(state.isValid)
         assertEquals("3", state.preview.valueText)
         assertEquals("Urlaub", state.preview.title)
     }
 
     @Test
-    fun `today is invalid`() {
+    fun `past date is valid and preview shows elapsed days`() {
+        val state = base.copy(targetDate = today.minusDays(3))
+
+        assertTrue(state.isValid)
+        assertEquals("3", state.preview.valueText)
+    }
+
+    @Test
+    fun `today is valid and preview shows zero`() {
         val state = base.copy(targetDate = today)
 
-        assertEquals(ValidationResult.NotInFuture, state.validation)
-        assertFalse(state.isValid)
+        assertTrue(state.isValid)
+        assertEquals("0", state.preview.valueText)
     }
 
     @Test

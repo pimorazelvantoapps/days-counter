@@ -35,6 +35,7 @@ import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,7 +48,6 @@ class ConfigActivityTest {
     val composeRule = createEmptyComposeRule()
 
     private val today = LocalDate.now()
-    private val tomorrow = today.plusDays(1)
     private val repository = FakeWidgetConfigRepository()
     private val scenarios = mutableListOf<ActivityScenario<ConfigActivity>>()
     private lateinit var context: Context
@@ -83,23 +83,25 @@ class ConfigActivityTest {
     ): String = context.getString(resId, *args)
 
     /**
-     * The picker opens on the month of the first selectable day and offers only future dates, so
-     * its first enabled day cell is tomorrow. A day cell carries the full localized date as its
-     * semantics text rather than the bare day number, which is why it is addressed by that
-     * position instead of by text; that the picked day really is tomorrow is asserted by the
-     * caller through the saved configuration. The expected count pins the match to the day cells
-     * of the displayed month, so a stray selectable node elsewhere on screen fails the test
-     * instead of being clicked.
+     * The picker opens on today's month, now with every day selectable including past ones, so
+     * the day cells of that month are exactly its selectable-and-enabled nodes. A day cell
+     * carries the full localized date as its semantics text rather than the bare day number,
+     * which is why it is addressed by position instead of by text; that the picked day really is
+     * yesterday is asserted by the caller through the saved configuration. The expected count
+     * pins the match to the day cells of the displayed month, so a stray selectable node
+     * elsewhere on screen fails the test instead of being clicked. Guarded against the one day a
+     * month where yesterday would fall in the previous, undisplayed month.
      */
-    private fun pickTomorrow() {
-        val selectableDaysOfDisplayedMonth = tomorrow.lengthOfMonth() - tomorrow.dayOfMonth + 1
+    private fun pickYesterday(): LocalDate {
+        Assume.assumeTrue(today.dayOfMonth > 1)
+        val yesterday = today.minusDays(1)
         composeRule.onNodeWithTag(ConfigTestTags.DATE_FIELD).performClick()
         composeRule
             .onAllNodes(isSelectable() and isEnabled())
-            .assertCountEquals(selectableDaysOfDisplayedMonth)
-            .onFirst()
+            .assertCountEquals(today.lengthOfMonth())[yesterday.dayOfMonth - 1]
             .performClick()
         composeRule.onNodeWithText(string(R.string.config_action_ok)).performClick()
+        return yesterday
     }
 
     @Test
@@ -108,7 +110,7 @@ class ConfigActivityTest {
 
         composeRule.onNodeWithTag(ConfigTestTags.TITLE_FIELD).performTextClearance()
         composeRule.onNodeWithTag(ConfigTestTags.TITLE_FIELD).performTextInput("Urlaub")
-        pickTomorrow()
+        val pastDate = pickYesterday()
         composeRule.onNodeWithTag(ConfigTestTags.COLOR_FIELD).performClick()
         composeRule.onNodeWithTag(ConfigTestTags.colorOption(HeaderColor.GREEN)).performClick()
         composeRule.onNodeWithTag(ConfigTestTags.SAVE_BUTTON).assertIsEnabled().performClick()
@@ -116,7 +118,7 @@ class ConfigActivityTest {
         composeRule.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
         assertEquals(Activity.RESULT_OK, scenario.result.resultCode)
         assertEquals(42, scenario.result.resultData.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1))
-        assertEquals(WidgetConfig("Urlaub", tomorrow, HeaderColor.GREEN), repository.saved[42])
+        assertEquals(WidgetConfig("Urlaub", pastDate, HeaderColor.GREEN), repository.saved[42])
     }
 
     @Test

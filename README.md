@@ -6,7 +6,9 @@ Ersatz für das nicht mehr gepflegte Widget „days left“.
 ## Funktionen
 
 - Beliebig viele Widgets, jedes mit eigenem Titel, Zieldatum und Header-Farbe (12 Farben)
-- Zeigt die verbleibenden Tage, „0“ am Zieltag und „-“ danach; angefangene Tage zählen voll
+- Zieldatum beliebig in Vergangenheit oder Zukunft; zeigt die verbleibenden Tage, „0“ am
+  Zieltag oder die seither vergangenen Tage – die Richtung steht im Titel, nicht auf dem
+  Blatt. Angefangene Tage zählen voll
 - Aktualisiert sich exakt um Mitternacht sowie bei Zeitzonen- oder Zeitänderung
 - Folgt dem hellen oder dunklen Systemthema
 - Oberfläche auf Deutsch und Englisch
@@ -14,7 +16,8 @@ Ersatz für das nicht mehr gepflegte Widget „days left“.
 ## Bedienung
 
 1. Widget „Days Counter“ auf den Homescreen ziehen. Der Konfigurationsdialog öffnet sich.
-2. Titel eingeben, Zieldatum wählen (frühestens morgen), Farbe antippen und aus dem Raster wählen.
+2. Titel eingeben, Zieldatum wählen (beliebig, auch in der Vergangenheit), Farbe antippen und
+   aus dem Raster wählen.
 3. Speichern. Ein Tipp auf das Widget öffnet den Dialog erneut.
 
 ## Installation aus dem Quellcode

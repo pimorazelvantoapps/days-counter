@@ -10,7 +10,6 @@ object ConfigTestTags {
     const val PREVIEW = "preview"
     const val TITLE_FIELD = "title_field"
     const val DATE_FIELD = "date_field"
-    const val DATE_ERROR = "date_error"
     const val COLOR_FIELD = "color_field"
     const val COLOR_GRID = "color_grid"
     const val SAVE_BUTTON = "save_button"

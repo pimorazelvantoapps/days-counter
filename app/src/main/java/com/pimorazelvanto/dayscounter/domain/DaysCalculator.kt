@@ -10,9 +10,9 @@ object DaysCalculator {
     ): DisplayValue {
         val remainingDays = ChronoUnit.DAYS.between(today, target).toInt()
         return when {
-            remainingDays > 0 -> DisplayValue.Days(remainingDays)
+            remainingDays > 0 -> DisplayValue.Remaining(remainingDays)
             remainingDays == 0 -> DisplayValue.Reached
-            else -> DisplayValue.Passed
+            else -> DisplayValue.Elapsed(-remainingDays)
         }
     }
 }

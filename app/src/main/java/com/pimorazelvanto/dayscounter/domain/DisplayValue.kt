@@ -3,7 +3,7 @@ package com.pimorazelvanto.dayscounter.domain
 sealed interface DisplayValue {
     val text: String
 
-    data class Days(
+    data class Remaining(
         val count: Int,
     ) : DisplayValue {
         override val text: String get() = count.toString()
@@ -13,7 +13,9 @@ sealed interface DisplayValue {
         override val text: String = "0"
     }
 
-    data object Passed : DisplayValue {
-        override val text: String = "-"
+    data class Elapsed(
+        val count: Int,
+    ) : DisplayValue {
+        override val text: String get() = count.toString()
     }
 }

@@ -29,7 +29,7 @@ class DaysCounterWidgetContentTest {
             setContext(context)
             provideComposable {
                 DaysCounterWidgetContent(
-                    WidgetUiState("Urlaub", "42", DigitSizeTier.LARGE, HeaderColor.BLUE, isPlaceholder = false),
+                    WidgetUiState("Urlaub", "42", DigitSizeTier.ONE_DIGIT, HeaderColor.BLUE, isPlaceholder = false),
                     onClick = anyClick,
                 )
             }
@@ -47,7 +47,7 @@ class DaysCounterWidgetContentTest {
                     WidgetUiState(
                         "Tage",
                         WidgetUiState.PLACEHOLDER_TEXT,
-                        DigitSizeTier.LARGE,
+                        DigitSizeTier.ONE_DIGIT,
                         HeaderColor.RED,
                         isPlaceholder = true,
                     ),
@@ -64,7 +64,7 @@ class DaysCounterWidgetContentTest {
             setContext(context)
             provideComposable {
                 DaysCounterWidgetContent(
-                    WidgetUiState("Tage", "3", DigitSizeTier.LARGE, HeaderColor.RED, isPlaceholder = false),
+                    WidgetUiState("Tage", "3", DigitSizeTier.ONE_DIGIT, HeaderColor.RED, isPlaceholder = false),
                     onClick = anyClick,
                 )
             }

@@ -2,9 +2,7 @@ package com.pimorazelvanto.dayscounter.widget
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
@@ -28,13 +26,9 @@ import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.pimorazelvanto.dayscounter.R
-import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
+import com.pimorazelvanto.dayscounter.ui.TextSizes
 
-private val TITLE_TEXT_SIZE = 10.sp
-private val VALUE_TEXT_SIZE_LARGE = 22.sp
-private val VALUE_TEXT_SIZE_MEDIUM = 17.sp
-private val VALUE_TEXT_SIZE_SMALL = 13.sp
 private val CONTENT_PADDING = 4.dp
 
 // These are literals rather than colour resources because Glance restricts its @ColorRes
@@ -43,22 +37,22 @@ private val CONTENT_PADDING = 4.dp
 // The day/night factory below resolves inside Glance itself.
 //
 // KEEP IN SYNC WITH the two other renderings of this design:
-//   res/layout/widget_preview.xml  the static launcher preview, restated in view XML
+//   res/layout/widget_preview.xml  the static launcher preview, restated in view XML; it cannot
+//                                  read Kotlin, so it keeps its own copy of the text sizes below
 //   config/WidgetPreview.kt        the Compose mirror on the configuration screen, which cannot
-//                                  use Glance because Glance does not render inside an activity
-// What can drift, and where:
+//                                  use Glance because Glance does not render inside an activity;
+//                                  it shares com.pimorazelvanto.dayscounter.ui.TextSizes with this file, so
+//                                  the text sizes themselves cannot drift from each other
+// What can still drift, and where:
 //   HEADER_TEXT_COLOR       <-> @color/widget_header_text (both other renderings read it)
 //   SHEET_TEXT_COLOR        <-> @color/widget_sheet_text, plus its values-night override
 //   PLACEHOLDER_TEXT_COLOR  <-> @color/widget_placeholder_text, plus its values-night override;
 //                               read only by WidgetPreview.kt, the XML preview has no placeholder
-//   TITLE_TEXT_SIZE         <-> @dimen/widget_title_text_size and WidgetPreview.TITLE_TEXT_SIZE
-//   VALUE_TEXT_SIZE_LARGE   <-> @dimen/widget_value_text_size_large and the same name there
-//   VALUE_TEXT_SIZE_MEDIUM  <-> the same name in WidgetPreview.kt
-//   VALUE_TEXT_SIZE_SMALL   <-> the same name in WidgetPreview.kt
+//   TextSizes.TITLE               <-> @dimen/widget_title_text_size
+//   TextSizes.value(TWO_DIGITS)   <-> @dimen/widget_value_text_size_two_digits
 //   CONTENT_PADDING         <-> WidgetPreview.HEADER_PADDING
-// Compose cannot read an sp dimension resource, which is why the four text sizes are restated
-// in Kotlin there rather than shared. @dimen/widget_header_height and
-// @color/widget_sheet_background are read as resources by all three.
+// @dimen/widget_header_height and @color/widget_sheet_background are read as resources by all
+// three renderings and cannot drift.
 private val HEADER_TEXT_COLOR = ColorProvider(Color.White)
 
 @Suppress("MagicNumber") // ARGB literals are the palette itself, not values to name.
@@ -108,7 +102,7 @@ private fun Header(state: WidgetUiState) {
             style =
                 TextStyle(
                     color = HEADER_TEXT_COLOR,
-                    fontSize = TITLE_TEXT_SIZE,
+                    fontSize = TextSizes.TITLE,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                 ),
@@ -130,17 +124,10 @@ private fun ColumnScope.Sheet(state: WidgetUiState) {
             style =
                 TextStyle(
                     color = textColor,
-                    fontSize = state.sizeTier.textSize(),
+                    fontSize = TextSizes.value(state.sizeTier),
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 ),
         )
     }
 }
-
-private fun DigitSizeTier.textSize(): TextUnit =
-    when (this) {
-        DigitSizeTier.LARGE -> VALUE_TEXT_SIZE_LARGE
-        DigitSizeTier.MEDIUM -> VALUE_TEXT_SIZE_MEDIUM
-        DigitSizeTier.SMALL -> VALUE_TEXT_SIZE_SMALL
-    }

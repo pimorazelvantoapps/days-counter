@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
-import com.pimorazelvanto.dayscounter.domain.ValidationResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -55,6 +54,7 @@ private val SCREEN_PADDING = 24.dp
 private val SECTION_SPACING = 20.dp
 private val COLOR_DOT_SIZE = 32.dp
 private const val MAX_YEARS_AHEAD = 100
+private const val MAX_YEARS_BEHIND = 200
 
 // ParameterNaming: the callbacks keep the past-tense names of the ConfigViewModel methods they
 // are bound to, and "onSaveFailureShown" has no sensible present-tense form.
@@ -182,7 +182,6 @@ private fun DateField(
     onClick: () -> Unit,
 ) {
     val formatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    val isError = state.validation == ValidationResult.NotInFuture
     val interactionSource = remember { MutableInteractionSource() }
     val currentOnClick by rememberUpdatedState(onClick)
     LaunchedEffect(interactionSource) {
@@ -194,22 +193,9 @@ private fun DateField(
         value = state.targetDate?.format(formatter) ?: "",
         onValueChange = {},
         readOnly = true,
-        isError = isError,
         interactionSource = interactionSource,
         label = { Text(stringResource(R.string.config_label_target_date)) },
         placeholder = { Text(stringResource(R.string.config_pick_date)) },
-        supportingText =
-            if (isError) {
-                {
-                    Text(
-                        text = stringResource(R.string.config_error_date_not_in_future),
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.testTag(ConfigTestTags.DATE_ERROR),
-                    )
-                }
-            } else {
-                null
-            },
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -258,13 +244,11 @@ private fun TargetDatePickerDialog(
     onConfirm: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val firstSelectable = today.plusDays(1)
     val datePickerState =
         rememberDatePickerState(
             initialSelectedDateMillis = initialDate?.toUtcStartOfDayMillis(),
-            initialDisplayedMonthMillis = (initialDate ?: firstSelectable).withDayOfMonth(1).toUtcStartOfDayMillis(),
-            yearRange = today.year..today.year + MAX_YEARS_AHEAD,
-            selectableDates = FutureOnlySelectableDates(today),
+            initialDisplayedMonthMillis = (initialDate ?: today).withDayOfMonth(1).toUtcStartOfDayMillis(),
+            yearRange = today.year - MAX_YEARS_BEHIND..today.year + MAX_YEARS_AHEAD,
         )
     DatePickerDialog(
         onDismissRequest = onDismiss,

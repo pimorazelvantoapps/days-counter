@@ -19,10 +19,9 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.pimorazelvanto.dayscounter.R
-import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
+import com.pimorazelvanto.dayscounter.ui.TextSizes
 
 private val PREVIEW_SIZE = 72.dp
 
@@ -32,19 +31,14 @@ private val PREVIEW_SIZE = 72.dp
 // the widget's corner either.
 private val PREVIEW_CORNER = 12.dp
 private val HEADER_PADDING = 4.dp
-private val TITLE_TEXT_SIZE = 10.sp
-private val VALUE_TEXT_SIZE_LARGE = 22.sp
-private val VALUE_TEXT_SIZE_MEDIUM = 17.sp
-private val VALUE_TEXT_SIZE_SMALL = 13.sp
 private const val SHEET_WEIGHT = 1f
 
 /**
  * Restates the Glance sheet of `widget/DaysCounterWidgetContent.kt` in ordinary Compose,
  * because Glance composables cannot render inside an activity. Both are driven by the same
- * [WidgetUiState]; the shared colour and dimension resources keep most of the design from
- * drifting. The four text sizes above are a third copy, after the Glance sheet and
- * `res/layout/widget_preview.xml`, because Compose can read a dp dimension resource but not an
- * sp one. The KEEP IN SYNC block in the Glance file lists every pair.
+ * [WidgetUiState] and the same [TextSizes]; the shared colour and dimension resources keep the
+ * rest of the design from drifting. Only [HEADER_PADDING], a dp constant, is still duplicated
+ * against the Glance file's `CONTENT_PADDING` - the KEEP IN SYNC block there lists it.
  */
 @Composable
 fun WidgetPreview(
@@ -70,7 +64,7 @@ fun WidgetPreview(
             Text(
                 text = state.title,
                 color = colorResource(R.color.widget_header_text),
-                fontSize = TITLE_TEXT_SIZE,
+                fontSize = TextSizes.TITLE,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -85,12 +79,7 @@ fun WidgetPreview(
             Text(
                 text = state.valueText,
                 color = colorResource(textColor),
-                fontSize =
-                    when (state.sizeTier) {
-                        DigitSizeTier.LARGE -> VALUE_TEXT_SIZE_LARGE
-                        DigitSizeTier.MEDIUM -> VALUE_TEXT_SIZE_MEDIUM
-                        DigitSizeTier.SMALL -> VALUE_TEXT_SIZE_SMALL
-                    },
+                fontSize = TextSizes.value(state.sizeTier),
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
             )

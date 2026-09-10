@@ -28,9 +28,13 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 - Kotlin Official Code Style, durchgesetzt per ktlint. `ktlintFormat` laufen lassen und sein
   Ergebnis übernehmen, statt von Hand dagegen zu formatieren.
 - Abhängigkeitsrichtung der Packages einhalten: `domain` kennt nichts; `data` kennt
-  `domain`; `widget` und `config` kennen `domain` und `data`, aber nicht einander. Einzige
-  Ausnahme: `widget` ruft `ConfigActivity.createIntent` auf, um den Tipp auf ein Widget an
-  dessen Konfiguration zu binden.
+  `domain`; `ui` kennt nur `domain` (für `DigitSizeTier`); `widget` und `config` kennen
+  `domain`, `data` und `ui`, aber nicht einander. Einzige Ausnahme: `widget` ruft
+  `ConfigActivity.createIntent` auf, um den Tipp auf ein Widget an dessen Konfiguration zu
+  binden.
+- `ui` enthält nur, was Compose's `TextUnit` braucht und deshalb nicht in `domain` darf
+  (`domain` bleibt frei von Android-/Compose-Typen): aktuell `TextSizes`, geteilt vom
+  Glance-Blatt in `widget` und seiner Compose-Vorschau in `config`.
 - `WidgetUpdater` und `MidnightUpdateScheduler` sind Schnittstellen in `domain` (wie `Clock`),
   ihre Implementierungen `GlanceWidgetUpdater` und `AlarmManagerMidnightUpdateScheduler` liegen
   in `widget`, weil sowohl `config` (zum Abschluss des Speicherns) als auch `widget` sie

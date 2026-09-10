@@ -1,8 +1,6 @@
 package com.pimorazelvanto.dayscounter.config
 
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
-import com.pimorazelvanto.dayscounter.domain.TargetDateValidator
-import com.pimorazelvanto.dayscounter.domain.ValidationResult
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
 import java.time.LocalDate
@@ -25,9 +23,7 @@ data class ConfigUiState(
     val defaultTitle: String,
     val saveState: SaveState = SaveState.Idle,
 ) {
-    val validation: ValidationResult? = targetDate?.let { TargetDateValidator.validate(today, it) }
-
-    val isValid: Boolean = validation == ValidationResult.Valid
+    val isValid: Boolean = targetDate != null
 
     val effectiveTitle: String = title.ifBlank { defaultTitle }
 

@@ -1,30 +1,31 @@
 package com.pimorazelvanto.dayscounter.domain
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 class DigitSizeTierTest {
     @ParameterizedTest(name = "{0} days -> {1}")
     @CsvSource(
-        "1, LARGE",
-        "99, LARGE",
-        "100, MEDIUM",
-        "999, MEDIUM",
-        "1000, SMALL",
-        "36500, SMALL",
+        "9, ONE_DIGIT",
+        "10, TWO_DIGITS",
+        "99, TWO_DIGITS",
+        "100, THREE_DIGITS",
+        "999, THREE_DIGITS",
+        "1000, FOUR_DIGITS",
+        "9999, FOUR_DIGITS",
+        "10000, FIVE_OR_MORE_DIGITS",
     )
     fun `tier depends on digit count`(
         days: Int,
         expected: DigitSizeTier,
     ) {
-        assertEquals(expected, DisplayValue.Days(days).sizeTier())
+        assertEquals(expected, DisplayValue.Remaining(days).sizeTier())
     }
 
-    @ParameterizedTest(name = "{0} uses LARGE")
-    @CsvSource("Reached", "Passed")
-    fun `reached and passed use large tier`(name: String) {
-        val value = if (name == "Reached") DisplayValue.Reached else DisplayValue.Passed
-        assertEquals(DigitSizeTier.LARGE, value.sizeTier())
+    @Test
+    fun `reached uses the one-digit tier`() {
+        assertEquals(DigitSizeTier.ONE_DIGIT, DisplayValue.Reached.sizeTier())
     }
 }

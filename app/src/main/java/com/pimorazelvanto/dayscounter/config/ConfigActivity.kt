@@ -59,7 +59,7 @@ class ConfigActivity : ComponentActivity() {
         }
     }
 
-    /** Re-validates a date that was picked before midnight against the day the user returns on. */
+    /** Keeps the live preview's day count current; see [ConfigViewModel.refreshToday]. */
     override fun onResume() {
         super.onResume()
         if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) viewModel.refreshToday()

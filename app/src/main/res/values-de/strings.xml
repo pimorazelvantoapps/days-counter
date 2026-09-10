@@ -9,7 +9,6 @@
     <string name="config_label_color">Farbe</string>
     <string name="config_pick_date">Datum wählen</string>
     <string name="config_title_length">%1$d/%2$d</string>
-    <string name="config_error_date_not_in_future">Das Datum muss in der Zukunft liegen</string>
     <string name="config_choose_color">Farbe wählen</string>
     <string name="config_action_cancel">Abbrechen</string>
     <string name="config_action_save">Speichern</string>
