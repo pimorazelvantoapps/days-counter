@@ -31,6 +31,7 @@ import com.pimorazelvanto.dayscounter.domain.WidgetConfig
 import com.pimorazelvanto.dayscounter.testsupport.ControlledClock
 import com.pimorazelvanto.dayscounter.testsupport.FakeAppContainer
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
+import com.pimorazelvanto.dayscounter.testsupport.PinnedLocaleRule
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -44,7 +45,12 @@ import java.time.format.FormatStyle
 
 @RunWith(AndroidJUnit4::class)
 class ConfigActivityTest {
-    @get:Rule
+    // Pinned first so the locale is already forced before the Compose hierarchy under test,
+    // and any Activity it launches, are set up.
+    @get:Rule(order = 0)
+    val localeRule = PinnedLocaleRule()
+
+    @get:Rule(order = 1)
     val composeRule = createEmptyComposeRule()
 
     private val today = LocalDate.now()
