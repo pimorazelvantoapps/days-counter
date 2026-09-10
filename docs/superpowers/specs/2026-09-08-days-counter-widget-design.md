@@ -122,8 +122,9 @@ diff < 0  -> Elapsed(-diff)   Anzeige: Zahl (Tage seit dem Ziel)
 ```
 
 Die Richtung (bis/seit) steht bewusst nur im Typ, nicht in der Anzeige: Das Blatt zeigt in
-beiden Fällen eine vorzeichenlose Zahl, ein 1x1-Feld hat keinen Platz für ein Vorzeichen und
-der Titel trägt die Bedeutung („Bis Urlaub“ vs. „Seit Umzug“).
+beiden Fällen eine vorzeichenlose Zahl, ein 1x1-Feld hat keinen Platz für ein Vorzeichen -
+ein Vorzeichen ist ein zusätzliches Zeichen und kostet damit nach der Schriftgrößen-Stufe
+unten eine ganze Stufe - und der Titel trägt die Bedeutung („Bis Urlaub“ vs. „Seit Umzug“).
 
 ### Schriftgrößen-Stufe
 

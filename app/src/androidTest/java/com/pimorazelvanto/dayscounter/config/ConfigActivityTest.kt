@@ -9,12 +9,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -35,12 +34,13 @@ import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @RunWith(AndroidJUnit4::class)
 class ConfigActivityTest {
@@ -83,25 +83,24 @@ class ConfigActivityTest {
     ): String = context.getString(resId, *args)
 
     /**
-     * The picker opens on today's month, now with every day selectable including past ones, so
-     * the day cells of that month are exactly its selectable-and-enabled nodes. A day cell
-     * carries the full localized date as its semantics text rather than the bare day number,
-     * which is why it is addressed by position instead of by text; that the picked day really is
-     * yesterday is asserted by the caller through the saved configuration. The expected count
-     * pins the match to the day cells of the displayed month, so a stray selectable node
-     * elsewhere on screen fails the test instead of being clicked. Guarded against the one day a
-     * month where yesterday would fall in the previous, undisplayed month.
+     * Navigates the picker one month back before picking, rather than picking yesterday in the
+     * month it opens on: every month has a [MID_MONTH_DAY]th day, so this reaches a date in the
+     * past regardless of today's day-of-month, whereas picking yesterday in today's own month
+     * would fall outside it on the first of any month. The day cell is addressed by its full
+     * localized date text rather than by position: the picker's month pager keeps a neighbouring
+     * month's cells around after a navigation click, so a position- or count-based query can see
+     * more than one month's days at once, but the target date's own text is unique regardless.
      */
-    private fun pickYesterday(): LocalDate {
-        Assume.assumeTrue(today.dayOfMonth > 1)
-        val yesterday = today.minusDays(1)
+    private fun pickMidPreviousMonth(): LocalDate {
+        val target = today.minusMonths(1).withDayOfMonth(MID_MONTH_DAY)
+        val targetCellText = target.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
         composeRule.onNodeWithTag(ConfigTestTags.DATE_FIELD).performClick()
         composeRule
-            .onAllNodes(isSelectable() and isEnabled())
-            .assertCountEquals(today.lengthOfMonth())[yesterday.dayOfMonth - 1]
+            .onNode(hasContentDescription(PREVIOUS_MONTH_LABEL, substring = true, ignoreCase = true))
             .performClick()
+        composeRule.onNodeWithText(targetCellText).performClick()
         composeRule.onNodeWithText(string(R.string.config_action_ok)).performClick()
-        return yesterday
+        return target
     }
 
     @Test
@@ -110,7 +109,7 @@ class ConfigActivityTest {
 
         composeRule.onNodeWithTag(ConfigTestTags.TITLE_FIELD).performTextClearance()
         composeRule.onNodeWithTag(ConfigTestTags.TITLE_FIELD).performTextInput("Urlaub")
-        val pastDate = pickYesterday()
+        val pastDate = pickMidPreviousMonth()
         composeRule.onNodeWithTag(ConfigTestTags.COLOR_FIELD).performClick()
         composeRule.onNodeWithTag(ConfigTestTags.colorOption(HeaderColor.GREEN)).performClick()
         composeRule.onNodeWithTag(ConfigTestTags.SAVE_BUTTON).assertIsEnabled().performClick()
@@ -172,5 +171,12 @@ class ConfigActivityTest {
 
         composeRule.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
         assertEquals(Activity.RESULT_CANCELED, scenario.result.resultCode)
+    }
+
+    private companion object {
+        const val MID_MONTH_DAY = 15
+
+        /** The current label Material 3's date picker gives its previous-month button. */
+        const val PREVIOUS_MONTH_LABEL = "previous month"
     }
 }
