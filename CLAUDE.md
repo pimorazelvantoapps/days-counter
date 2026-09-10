@@ -17,12 +17,16 @@ Kotlin, minSdk 33, compileSdk/targetSdk 37, Jetpack Glance (Widget), Jetpack Com
 ./gradlew ktlintFormat     # Formatierung anwenden
 ```
 
+Beide Prüfläufe immer aus dem Wurzelverzeichnis starten: detekt hängt am Wurzelprojekt,
+`:app:check` überspringt es stillschweigend und meldet trotzdem Erfolg.
+
 `check` muss vor jedem Commit fehlerfrei durchlaufen. Warnungen sind Fehler; Schwellwerte
 in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 
 ## Code
 
-- Kotlin Official Code Style, durchgesetzt per ktlint.
+- Kotlin Official Code Style, durchgesetzt per ktlint. `ktlintFormat` laufen lassen und sein
+  Ergebnis übernehmen, statt von Hand dagegen zu formatieren.
 - Abhängigkeitsrichtung der Packages einhalten: `domain` kennt nichts; `data` kennt
   `domain`; `widget` und `config` kennen `domain` und `data`, aber nicht einander. Einzige
   Ausnahme: `widget` ruft `ConfigActivity.createIntent` auf, um den Tipp auf ein Widget an
@@ -36,11 +40,19 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 - Der Widget-Inhalt wird innerhalb der Komposition beobachtet (`WidgetConfigRepository.observe`,
   `Clock.days()`), nie vor `provideContent` einmalig gelesen. Grund und Konsequenzen stehen im
   Docblock von `DaysCounterWidget.provideGlance`.
+- In Glance nie `ColorProvider(@ColorRes Int)` verwenden. Die Funktion ist `@RestrictTo`, weil
+  die Farbe im Prozess des Launchers statt der App aufgelöst werden kann, was den Dunkelmodus
+  bricht. Stattdessen `ColorProvider(day, night)` oder das öffentliche `background(@ColorRes)`.
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
+- Lints `UnusedResources` ist ein Fehler: eine Ressource erst anlegen, wenn sie im selben
+  Commit auch verwendet wird.
 - Test-Fakes und `ControlledClock` liegen in `app/src/sharedTest/java` und werden von Unit- und
   Instrumentation-Tests gemeinsam genutzt. Keine zweite Kopie anlegen.
 - Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
   tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.
+- Vor `connectedCheck` die Animationen abschalten, sonst sind die Compose-Tests flaky:
+  `adb shell settings put global {window,transition}_animation_scale 0` und
+  `animator_duration_scale 0`.
 
 ## Dokumentation
 
