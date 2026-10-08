@@ -1,0 +1,15 @@
+name: Set up Android build
+description: JDK, Gradle with cache and wrapper validation, and the SDK packages the project compiles against.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - uses: gradle/actions/setup-gradle@v6
+
+    - name: Install SDK platform and build tools
+      shell: bash
+      run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" "build-tools;37.0.0" > /dev/null
