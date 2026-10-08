@@ -23,6 +23,16 @@ Beide Prüfläufe immer aus dem Wurzelverzeichnis starten: detekt hängt am Wurz
 `check` muss vor jedem Commit fehlerfrei durchlaufen. Warnungen sind Fehler; Schwellwerte
 in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 
+## Commits
+
+- Jede Commit-Nachricht folgt Conventional Commits (englisch, Imperativ). Der Typ bestimmt die
+  nächste Version (Tabelle im `README.md`, Abschnitt „Releases“), deshalb nach der Wirkung für
+  Nutzer wählen, nicht nach dem Umfang der Änderung.
+- Keine Merge-Commits: Branches vor dem Merge auf `main` rebasen. Die CI prüft jeden einzelnen
+  Commit eines PRs, weil jeder einzeln auf `main` landet.
+- Version nie von Hand in `app/build.gradle.kts` setzen. semantic-release übergibt sie beim
+  Release als `-PappVersion`.
+
 ## Code
 
 - Kotlin Official Code Style, durchgesetzt per ktlint. `ktlintFormat` laufen lassen und sein

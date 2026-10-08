@@ -36,6 +36,25 @@ Voraussetzungen: JDK 17 oder neuer, Android SDK mit Platform 37 und Build-Tools 
 
 Architektur und Entscheidungen: `docs/superpowers/specs/2026-09-08-days-counter-widget-design.md`.
 
+Jeder Pull Request durchläuft dieselben Prüfungen in GitHub Actions, die instrumentierten Tests
+auf einem Emulator. Gemergt wird nur per Rebase, Merge-Commits sind nicht erlaubt.
+
+## Releases
+
+Versionen entstehen automatisch: Jeder Push auf `main` mit einem release-relevanten Commit
+erzeugt per [semantic-release](https://semantic-release.gitbook.io/) einen Tag `vX.Y.Z` und
+ein GitHub-Release mit Änderungsübersicht. Dafür folgt jede Commit-Nachricht
+[Conventional Commits](https://www.conventionalcommits.org/de/v1.0.0/):
+
+| Commit | Wirkung |
+|---|---|
+| `feat: …` | neue Minor-Version (1.2.0 → 1.3.0) |
+| `fix: …`, `perf: …` | neue Patch-Version (1.2.0 → 1.2.1) |
+| `feat!: …` oder Footer `BREAKING CHANGE:` | neue Major-Version (1.2.0 → 2.0.0) |
+| `docs`, `test`, `build`, `ci`, `refactor`, `chore` | kein Release |
+
+Lokale Builds tragen die Version `0.0.0-dev`.
+
 ## Lizenz
 
 MIT, siehe [`LICENSE`](LICENSE).
