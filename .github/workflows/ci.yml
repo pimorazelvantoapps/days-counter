@@ -100,7 +100,16 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck
+          script: |
+            ./gradlew connectedCheck assembleStaging
+            scripts/smoke-test-minified.sh
+
+      # connectedCheck reports success with zero tests when the app crashes before the runner
+      # starts.
+      - name: Fail if no instrumented test ran
+        run: |
+          grep -rqE 'tests="[1-9]' app/build/outputs/androidTest-results/connected/ ||
+            { echo "connectedCheck ran no tests; did the app crash on start?" >&2; exit 1; }
 
       - name: Upload reports
         if: ${{ !cancelled() }}

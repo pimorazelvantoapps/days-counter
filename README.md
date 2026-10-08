@@ -41,6 +41,7 @@ Voraussetzungen: JDK 17 oder neuer, Android SDK mit Platform 37 und Build-Tools 
 
     ./gradlew check            # Lint, ktlint, detekt, Unit- und Robolectric-Tests
     ./gradlew connectedCheck   # Instrumentierte Tests auf einem laufenden Emulator
+    ./gradlew assembleStaging && scripts/smoke-test-minified.sh   # Minifizierte App auf dem Emulator starten
     ./gradlew ktlintFormat     # Formatierung anwenden
 
 Architektur und Entscheidungen: `docs/superpowers/specs/2026-09-08-days-counter-widget-design.md`.

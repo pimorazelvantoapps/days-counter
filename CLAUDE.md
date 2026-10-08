@@ -13,6 +13,7 @@ Kotlin, minSdk 33, compileSdk/targetSdk 37, Jetpack Glance (Widget), Jetpack Com
 ```
 ./gradlew check            # Lint, ktlint, detekt, Unit- und Robolectric-Tests
 ./gradlew connectedCheck   # Instrumentierte Tests auf laufendem Emulator
+./gradlew assembleStaging && scripts/smoke-test-minified.sh   # Minifizierten Build auf Emulator prüfen
 ./gradlew assembleDebug    # APK für Sideload
 ./gradlew ktlintFormat     # Formatierung anwenden
 ```
@@ -67,6 +68,12 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   `PrivateResource` schlägt an, und das ist hier ein Fehler.
 - Robolectric unterstützt `targetSdk 37` nicht (`maxSdkVersion=36`). Robolectric-Testklassen
   tragen deshalb `@Config(sdk = [35])`; `compileSdk`/`targetSdk` des Projekts bleiben unverändert.
+- Release und `staging` sind mit R8 minifiziert; `staging` ist das Release mit Debug-Signatur
+  und dient nur dem Smoke-Test. Die instrumentierten Tests laufen gegen Debug; nicht per
+  Keep-Regeln gegen den minifizierten Build umstellen (Grund im Kopf von
+  `scripts/smoke-test-minified.sh`).
+- `connectedCheck` meldet Erfolg auch dann, wenn die App vor dem Test-Runner abstürzt und kein
+  Test läuft. Nach Änderungen an Abhängigkeiten oder R8 die Testzahl prüfen.
 - Vor `connectedCheck` die Animationen abschalten, sonst sind die Compose-Tests flaky:
   `adb shell settings put global {window,transition}_animation_scale 0` und
   `animator_duration_scale 0`.
