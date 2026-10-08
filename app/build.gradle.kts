@@ -5,6 +5,24 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
+val releaseVersion: String? = providers.gradleProperty("appVersion").orNull
+
+/**
+ * Packs a `MAJOR.MINOR.PATCH` version into `MAJOR * 1_000_000 + MINOR * 1_000 + PATCH`, so every
+ * release gets a strictly greater `versionCode` than its predecessor, as Google Play requires.
+ * Minor and patch must therefore stay below 1000.
+ */
+fun versionCodeOf(semanticVersion: String): Int {
+    val (major, minor, patch) =
+        requireNotNull(Regex("""(\d+)\.(\d+)\.(\d+)""").matchEntire(semanticVersion)) {
+            "appVersion must look like MAJOR.MINOR.PATCH, was '$semanticVersion'"
+        }.destructured.toList().map(String::toInt)
+    require(minor < 1_000 && patch < 1_000) {
+        "appVersion '$semanticVersion' does not fit the versionCode scheme: minor and patch must be below 1000"
+    }
+    return major * 1_000_000 + minor * 1_000 + patch
+}
+
 android {
     namespace = "com.pimorazelvanto.dayscounter"
     compileSdk = 37
@@ -13,8 +31,8 @@ android {
         applicationId = "com.pimorazelvanto.dayscounter"
         minSdk = 33
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = releaseVersion?.let(::versionCodeOf) ?: 1
+        versionName = releaseVersion ?: "0.0.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
