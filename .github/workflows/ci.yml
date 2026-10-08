@@ -61,6 +61,14 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # Google's download of the system image intermittently breaks off ("Error on ZipFile
+      # unknown archive"); sdkmanager skips the download when the cached image is present.
+      - name: Cache emulator system image
+        uses: actions/cache@v6
+        with:
+          path: /usr/local/lib/android/sdk/system-images/android-34/google_apis/x86_64
+          key: system-image-android-34-google_apis-x86_64
+
       - uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
