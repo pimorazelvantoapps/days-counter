@@ -58,8 +58,9 @@ ein GitHub-Release mit Änderungsübersicht. Dafür folgt jede Commit-Nachricht
 |---|---|
 | `feat: …` | neue Minor-Version (1.2.0 → 1.3.0) |
 | `fix: …`, `perf: …` | neue Patch-Version (1.2.0 → 1.2.1) |
+| `build(deps): …` (Dependabot) | neue Patch-Version, damit aktualisierte Bibliotheken samt Sicherheitsfixes ausgeliefert werden |
 | `feat!: …` oder Footer `BREAKING CHANGE:` | neue Major-Version (1.2.0 → 2.0.0) |
-| `docs`, `test`, `build`, `ci`, `refactor`, `chore` | kein Release |
+| `docs`, `test`, `build` (ohne Scope `deps`), `ci`, `refactor`, `chore` | kein Release |
 
 Lokale Builds tragen die Version `0.0.0-dev`.
 
