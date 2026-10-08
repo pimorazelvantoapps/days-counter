@@ -38,7 +38,16 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+        // The release build signed with the debug key, so CI can install the exact minified app
+        // for a smoke test.
+        create("staging") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
         }
     }
 
@@ -101,6 +110,12 @@ dependencies {
 
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
+    constraints {
+        // Glance pulls WorkManager 2.7.1, whose Room 2.2.5 creates WorkDatabase reflectively.
+        // R8 removes that constructor and the minified app crashes on start; WorkManager 2.8+
+        // brings a Room with matching keep rules.
+        implementation(libs.androidx.work.runtime)
+    }
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter.api)
