@@ -12,4 +12,7 @@ runs:
 
     - name: Install SDK platform and build tools
       shell: bash
-      run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37" "build-tools;37.0.0" > /dev/null
+      run: |
+        # Process substitution instead of a pipe: under pipefail, `yes` dying of SIGPIPE once
+        # sdkmanager exits would fail the step even when the installation succeeded.
+        "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "platforms;android-37.0" "build-tools;37.0.0" < <(yes) > /dev/null
