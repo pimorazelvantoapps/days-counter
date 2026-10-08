@@ -35,3 +35,7 @@ Voraussetzungen: JDK 17 oder neuer, Android SDK mit Platform 37 und Build-Tools 
     ./gradlew ktlintFormat     # Formatierung anwenden
 
 Architektur und Entscheidungen: `docs/superpowers/specs/2026-09-08-days-counter-widget-design.md`.
+
+## Lizenz
+
+MIT, siehe [`LICENSE`](LICENSE).
