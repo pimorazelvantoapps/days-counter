@@ -23,9 +23,23 @@ fun versionCodeOf(semanticVersion: String): Int {
     return major * 1_000_000 + minor * 1_000 + patch
 }
 
+/** Path to the Play upload keystore; only CI's release job and manual uploads provide it. */
+val uploadKeystoreFile: String? = providers.environmentVariable("UPLOAD_KEYSTORE_FILE").orNull
+
 android {
     namespace = "com.pimorazelvanto.dayscounter"
     compileSdk = 37
+
+    signingConfigs {
+        if (uploadKeystoreFile != null) {
+            create("upload") {
+                storeFile = file(uploadKeystoreFile)
+                storePassword = providers.environmentVariable("UPLOAD_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("UPLOAD_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("UPLOAD_KEY_PASSWORD").get()
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.pimorazelvanto.dayscounter"
@@ -41,6 +55,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            // Without the upload key the release build stays unsigned, as in pull requests.
+            signingConfig = signingConfigs.findByName("upload")
         }
         // The release build signed with the debug key, so CI can install the exact minified app
         // for a smoke test.
