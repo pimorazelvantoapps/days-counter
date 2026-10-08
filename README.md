@@ -1,7 +1,15 @@
 # Days Counter
 
+[![CI](https://github.com/pimorazelvantoapps/days-counter/actions/workflows/ci.yml/badge.svg)](https://github.com/pimorazelvantoapps/days-counter/actions/workflows/ci.yml)
+
 Ein 1x1-Homescreen-Widget für Android 13 und neuer, das die Tage bis zu einem Datum zählt.
 Ersatz für das nicht mehr gepflegte Widget „days left“.
+
+> **Studienprojekt:** Dieses Repository dient dazu, KI-gestützte Softwareentwicklung und die
+> Entwicklung für Android einzuüben. Code, Tests, Dokumentation und Build-Konfiguration sind
+> weitgehend in Zusammenarbeit mit einem KI-Coding-Assistenten entstanden. Die App ist
+> funktionsfähig und getestet, wird aber als Lern- und Testprojekt gepflegt, ohne Zusagen zu
+> Support oder Weiterentwicklung.
 
 ## Funktionen
 
