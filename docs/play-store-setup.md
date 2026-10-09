@@ -22,9 +22,10 @@ Upload-Schlüssel beweist nur, dass ein Upload von dir kommt; geht er verloren, 
 Play-Support ihn zurück.
 
 ```sh
-mkdir -p ~/keys
-keytool -genkeypair -v -keystore ~/keys/days-counter-upload.jks -alias upload \
+mkdir -p -m 700 ~/.keys
+keytool -genkeypair -v -keystore ~/.keys/days-counter-upload.jks -alias upload \
   -keyalg RSA -keysize 4096 -validity 9125
+chmod 600 ~/.keys/days-counter-upload.jks
 ```
 
 Keystore-Datei und beide Passwörter im Passwortmanager sichern. Nie ins Repo legen.
@@ -40,7 +41,7 @@ gh api -X PUT repos/$REPO/environments/play-store \
 gh api -X POST repos/$REPO/environments/play-store/deployment-branch-policies \
   -f name=main -f type=branch
 
-base64 -i ~/keys/days-counter-upload.jks | gh secret set UPLOAD_KEYSTORE_BASE64 --env play-store --repo $REPO
+base64 -i ~/.keys/days-counter-upload.jks | gh secret set UPLOAD_KEYSTORE_BASE64 --env play-store --repo $REPO
 gh secret set UPLOAD_KEYSTORE_PASSWORD --env play-store --repo $REPO   # fragt nach dem Wert
 gh secret set UPLOAD_KEY_ALIAS --env play-store --repo $REPO --body upload
 gh secret set UPLOAD_KEY_PASSWORD --env play-store --repo $REPO       # fragt nach dem Wert
@@ -69,7 +70,7 @@ VERSION=$(git describe --tags --abbrev=0 | sed 's/^v//')
 git switch --detach v$VERSION
 read -rs -p "Keystore-Passwort: " UPLOAD_KEYSTORE_PASSWORD; echo
 read -rs -p "Schlüssel-Passwort: " UPLOAD_KEY_PASSWORD; echo
-UPLOAD_KEYSTORE_FILE=~/keys/days-counter-upload.jks UPLOAD_KEY_ALIAS=upload \
+UPLOAD_KEYSTORE_FILE=~/.keys/days-counter-upload.jks UPLOAD_KEY_ALIAS=upload \
   UPLOAD_KEYSTORE_PASSWORD=$UPLOAD_KEYSTORE_PASSWORD UPLOAD_KEY_PASSWORD=$UPLOAD_KEY_PASSWORD \
   ./gradlew bundleRelease -PappVersion=$VERSION --no-configuration-cache
 git switch main
