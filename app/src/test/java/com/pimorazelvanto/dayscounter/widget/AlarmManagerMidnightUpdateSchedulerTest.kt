@@ -32,7 +32,7 @@ class AlarmManagerMidnightUpdateSchedulerTest {
     }
 
     @Test
-    fun `schedules exact wakeup alarm at next local midnight`() {
+    fun `schedules wakeup alarm in a ten-minute window starting at next local midnight`() {
         scheduler.schedule()
 
         val alarm = shadowOf(alarmManager).scheduledAlarms.single()
@@ -44,8 +44,7 @@ class AlarmManagerMidnightUpdateSchedulerTest {
                 .toEpochMilli()
         assertEquals(expectedMidnight, alarm.triggerAtMs)
         assertEquals(AlarmManager.RTC_WAKEUP, alarm.getType())
-        assertTrue(alarm.isAllowWhileIdle)
-        assertEquals(0L, alarm.windowLengthMs)
+        assertEquals(TEN_MINUTES_MS, alarm.windowLengthMs)
     }
 
     @Test
@@ -75,5 +74,9 @@ class AlarmManagerMidnightUpdateSchedulerTest {
         val intent = shadowOf(operation).savedIntent
         assertEquals(DateChangeReceiver.ACTION_MIDNIGHT, intent.action)
         assertEquals(DateChangeReceiver::class.java.name, intent.component?.className)
+    }
+
+    private companion object {
+        const val TEN_MINUTES_MS = 10 * 60 * 1000L
     }
 }

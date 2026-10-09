@@ -19,7 +19,8 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
   allein im Titel, das Blatt zeigt immer eine vorzeichenlose Zahl
 - Angefangene Tage zählen voll: Am Vortag um 23:55 wird „1“ angezeigt
 - Zieldatum beliebig, auch in der Vergangenheit
-- Exakte Aktualisierung um Mitternacht, außerdem bei Zeitzonen-/Zeitänderung, Neustart, App-Update
+- Aktualisierung innerhalb von zehn Minuten nach Mitternacht, außerdem bei Zeitzonen-/Zeitänderung,
+  Neustart, App-Update
 - Konfigurationsdialog beim Platzieren und bei Tipp auf das Widget
 - Blatt folgt dem Systemthema (hell/dunkel), Header behält gewählte Farbe
 - Deutsch und Englisch, Englisch als Fallback
@@ -43,7 +44,7 @@ Instanzen mit eigenem Titel, Zieldatum und Header-Farbe sind möglich.
 | Widget-UI | Jetpack Glance |
 | Konfigurations-UI | Jetpack Compose, Material 3 |
 | Persistenz | App-weites Preferences DataStore, Schlüssel suffigiert je Widget-ID (nicht Glance-eigen, siehe Abschnitt 6) |
-| Zeitplanung | AlarmManager, exakter Alarm, Berechtigung `USE_EXACT_ALARM` |
+| Zeitplanung | AlarmManager, Alarm mit festem Fenster (`setWindow`), ohne Berechtigung |
 | Build | Gradle Kotlin DSL, Version Catalog |
 | Coding Standard | Kotlin Official Code Style, durchgesetzt per ktlint |
 | Statische Analyse | ktlint, detekt, Android Lint, Compiler-Warnungen als Fehler |
@@ -192,11 +193,13 @@ werden muss.
 
 ### Mitternachtsalarm
 
-`MidnightUpdateScheduler` plant über `AlarmManager.setExactAndAllowWhileIdle` einen
-einzigen Alarm für alle Widgets auf 00:00:00 lokaler Zeit des nächsten Tages. Die
-Berechtigung `USE_EXACT_ALARM` (ab API 33 normal, immer erteilt) wird im Manifest
-deklariert. Kein Fallback nötig. `setAlarmClock` wird nicht verwendet, weil es ein
-Wecker-Symbol in der Statusleiste einblendet.
+`MidnightUpdateScheduler` plant über `AlarmManager.setWindow` einen einzigen Alarm für alle
+Widgets, der frühestens um 00:00:00 lokaler Zeit des nächsten Tages und spätestens zehn
+Minuten danach feuert. Ein exakter Alarm entfällt, weil Google Play `USE_EXACT_ALARM` nur
+Wecker- und Kalender-Apps gestattet; die Abwägung gegenüber `set()` und dem Verhalten im
+Ruhemodus steht im Docblock von `AlarmManagerMidnightUpdateScheduler.schedule`.
+`setAlarmClock` wird nicht verwendet, weil es ein Wecker-Symbol in der Statusleiste
+einblendet.
 
 Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant wird:
 
@@ -334,8 +337,9 @@ Vollständige Abdeckung von `domain`:
 
 - `WidgetConfigRepository`: Schreiben/Lesen, Isolation zwischen IDs, fehlende Schlüssel
   → `null`, korruptes Datum → `null`.
-- `MidnightUpdateScheduler`: genau ein Alarm auf nächste Mitternacht in Gerätezeitzone,
-  Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
+- `MidnightUpdateScheduler`: genau ein Alarm ab nächster Mitternacht in Gerätezeitzone mit
+  zehn Minuten Fenster, Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
+- Manifest: keine Berechtigung für exakte Alarme, auch nicht über Bibliotheken.
 - `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst
   Update und Neuplanung aus; die behandelten Aktionen und die Intent-Filter des Manifests
   stimmen in beiden Richtungen überein.

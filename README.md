@@ -17,7 +17,8 @@ Ersatz für das nicht mehr gepflegte Widget „days left“.
 - Zieldatum beliebig in Vergangenheit oder Zukunft; zeigt die verbleibenden Tage, „0“ am
   Zieltag oder die seither vergangenen Tage – die Richtung steht im Titel, nicht auf dem
   Blatt. Angefangene Tage zählen voll
-- Aktualisiert sich exakt um Mitternacht sowie bei Zeitzonen- oder Zeitänderung
+- Aktualisiert sich kurz nach Mitternacht (innerhalb von zehn Minuten) sowie bei Zeitzonen-
+  oder Zeitänderung
 - Folgt dem hellen oder dunklen Systemthema
 - Oberfläche auf Deutsch und Englisch
 
