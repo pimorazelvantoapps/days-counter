@@ -1,26 +1,30 @@
 package com.pimorazelvanto.dayscounter.widget
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.pimorazelvanto.dayscounter.domain.Clock
 import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
+import java.time.Duration
 
 class AlarmManagerMidnightUpdateScheduler(
     private val context: Context,
     private val alarmManager: AlarmManager,
     private val clock: Clock,
 ) : MidnightUpdateScheduler {
-    // Lint's MissingPermission check for setExactAndAllowWhileIdle only recognises
-    // SCHEDULE_EXACT_ALARM, not the USE_EXACT_ALARM permission declared in the manifest.
-    // minSdk 33 makes USE_EXACT_ALARM a normal, always-granted permission that covers this call.
-    @SuppressLint("MissingPermission")
+    /**
+     * Fires within [MIDNIGHT_WINDOW] after midnight, never before it. Exact alarms would need
+     * USE_EXACT_ALARM, which Google Play reserves for alarm clock and calendar apps. A plain
+     * `set()` is no alternative: Android derives its window from the remaining time and could
+     * delay an alarm scheduled a day ahead by many hours. In Doze the alarm waits for the next
+     * maintenance window or for the device to wake up, when the screen is off anyway.
+     */
     override fun schedule() {
-        alarmManager.setExactAndAllowWhileIdle(
+        alarmManager.setWindow(
             AlarmManager.RTC_WAKEUP,
             nextMidnightEpochMillis(),
+            MIDNIGHT_WINDOW.toMillis(),
             midnightPendingIntent(),
         )
     }
@@ -49,5 +53,8 @@ class AlarmManagerMidnightUpdateScheduler(
 
     private companion object {
         const val REQUEST_CODE_MIDNIGHT = 1
+
+        /** The shortest window Android grants an inexact alarm since API 31. */
+        val MIDNIGHT_WINDOW: Duration = Duration.ofMinutes(10)
     }
 }
