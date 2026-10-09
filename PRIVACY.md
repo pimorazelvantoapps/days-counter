@@ -12,8 +12,8 @@ Days Counter erhebt, verarbeitet und überträgt keine personenbezogenen Daten.
   den Entwickler oder an Dritte.
 - Die App enthält keine Werbung, keine Analyse- oder Tracking-Werkzeuge und keine
   Nutzerkonten.
-- Die Berechtigungen für Alarme und den Gerätestart dienen nur dazu, die Anzeige um
-  Mitternacht und nach einem Neustart zu aktualisieren.
+- Die Berechtigung für den Gerätestart dient nur dazu, die Anzeige nach einem Neustart zu
+  aktualisieren.
 
 Fragen: über die Issues unter
 <https://github.com/pimorazelvantoapps/days-counter/issues>.
@@ -27,7 +27,6 @@ Days Counter does not collect, process or transmit any personal data.
 - The app has no permission to access the internet and therefore sends no data to the
   developer or to third parties.
 - The app contains no ads, no analytics or tracking tools and no user accounts.
-- The alarm and boot permissions are used only to refresh the display at midnight and after
-  a restart.
+- The boot permission is used only to refresh the display after a restart.
 
 Questions: via the issues at <https://github.com/pimorazelvantoapps/days-counter/issues>.
