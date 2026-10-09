@@ -79,8 +79,10 @@ git switch main
 hochladen, `app/build/outputs/mapping/release/mapping.txt` als Deobfuskierungsdatei
 hinzufügen, Release zur Überprüfung einreichen.
 
-Die Tags vor `v1.0.2` enthalten noch keine Signatur-Konfiguration; dafür eine neuere
-Version nehmen.
+Erst Versionen nach `v1.0.2` enthalten die Signatur-Konfiguration. Ist `v1.0.2` noch die
+neueste Version, statt des Tags den aktuellen Stand von `main` mit `-PappVersion=1.0.2`
+bauen (also `git switch --detach v$VERSION` weglassen): Er unterscheidet sich von `v1.0.2`
+nur in CI, Dokumentation und eben der Signatur.
 
 ## 5. Google Cloud: Workload Identity Federation
 
