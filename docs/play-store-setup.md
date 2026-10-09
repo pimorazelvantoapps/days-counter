@@ -56,8 +56,7 @@ gh secret set UPLOAD_KEY_PASSWORD --env play-store --repo $REPO       # fragt na
    `https://github.com/pimorazelvantoapps/days-counter/blob/main/PRIVACY.md`;
    Datensicherheit „Es werden keine Nutzerdaten erhoben oder geteilt“; Einstufung des
    Inhalts; Zielgruppe; keine Werbung.
-4. *Berechtigungserklärung* für `USE_EXACT_ALARM`, falls die Konsole sie verlangt.
-5. *Test → Geschlossener Test*: Track anlegen, Testerliste (E-Mail-Liste oder Google Group)
+4. *Test → Geschlossener Test*: Track anlegen, Testerliste (E-Mail-Liste oder Google Group)
    mit mindestens 12 Personen. Für den Produktionszugang müssen sie 14 Tage ohne
    Unterbrechung eingetragen bleiben.
 
