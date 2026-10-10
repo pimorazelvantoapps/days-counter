@@ -14,6 +14,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.util.TimeZone
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SystemClockTest {
@@ -54,6 +55,45 @@ class SystemClockTest {
             assertEquals(listOf(firstDay), emitted)
         }
 
+    @Test
+    fun `today is still the previous day at 23 55 and the new day at midnight`() =
+        withDefaultZone(BERLIN) {
+            val lateEvening = MovableInstantSource(Instant.parse("2026-09-07T21:55:00Z"))
+            val clock = SystemClock(lateEvening)
+
+            val beforeMidnight = clock.today()
+            lateEvening.advance(Duration.ofMinutes(5))
+
+            assertEquals(LocalDate.of(2026, 9, 7), beforeMidnight)
+            assertEquals(LocalDate.of(2026, 9, 8), clock.today())
+        }
+
+    @Test
+    fun `today and zone follow a device time-zone change without a new clock`() =
+        withDefaultZone(BERLIN) {
+            val clock = SystemClock(MovableInstantSource(Instant.parse("2026-09-08T00:30:00Z")))
+            val dayInBerlin = clock.today()
+
+            TimeZone.setDefault(TimeZone.getTimeZone(NEW_YORK))
+
+            assertEquals(LocalDate.of(2026, 9, 8), dayInBerlin)
+            assertEquals(LocalDate.of(2026, 9, 7), clock.today())
+            assertEquals(NEW_YORK, clock.zone())
+        }
+
+    private fun withDefaultZone(
+        zone: ZoneId,
+        block: () -> Unit,
+    ) {
+        val original = TimeZone.getDefault()
+        TimeZone.setDefault(TimeZone.getTimeZone(zone))
+        try {
+            block()
+        } finally {
+            TimeZone.setDefault(original)
+        }
+    }
+
     /** Collects into a list that grows as the test drives the clock; cancelled with the test. */
     private fun TestScope.collectDays(): List<LocalDate> {
         val emitted = mutableListOf<LocalDate>()
@@ -73,5 +113,10 @@ class SystemClockTest {
         fun advance(duration: Duration) {
             current = current.plus(duration)
         }
+    }
+
+    private companion object {
+        val BERLIN: ZoneId = ZoneId.of("Europe/Berlin")
+        val NEW_YORK: ZoneId = ZoneId.of("America/New_York")
     }
 }
