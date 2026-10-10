@@ -59,7 +59,9 @@ jobs:
           packageName: com.pimorazelvanto.dayscounter
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           tracks: alpha
-          status: completed
+          # Until Google has reviewed the first release, the app is a draft and accepts only draft
+          # releases; the repository variable PLAY_RELEASE_STATUS=draft covers that period.
+          status: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
           releaseName: v${{ inputs.version }}
           whatsNewDirectory: distribution/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt
