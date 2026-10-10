@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tage-Zähler</string>
-    <string name="widget_description">Zählt die Tage bis zu einem Datum</string>
+    <string name="widget_description">Zählt die Tage bis zu oder seit einem Datum</string>
     <string name="default_title">Tage</string>
     <string name="config_screen_title">Widget einrichten</string>
     <string name="config_label_title">Titel</string>
