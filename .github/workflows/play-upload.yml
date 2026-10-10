@@ -58,7 +58,8 @@ jobs:
           serviceAccountJson: ${{ steps.auth.outputs.credentials_file_path }}
           packageName: com.pimorazelvanto.dayscounter
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          tracks: alpha
+          # Comma-separated Play tracks; alpha is the closed test that counts towards production access.
+          tracks: ${{ vars.PLAY_TRACKS || 'alpha' }}
           # Until Google has reviewed the first release, the app is a draft and accepts only draft
           # releases; the repository variable PLAY_RELEASE_STATUS=draft covers that period.
           status: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
