@@ -131,5 +131,16 @@ gh variable set GCP_WORKLOAD_IDENTITY_PROVIDER --repo $REPO \
 gh variable set GCP_SERVICE_ACCOUNT --repo $REPO --body "$SERVICE_ACCOUNT"
 ```
 
+Solange Google noch kein Release der App geprüft hat, gilt sie als Entwurf und nimmt per API
+nur Entwürfe an. Bis dahin die Uploads als Entwurf anlegen lassen und in der Play Console
+selbst zur Überprüfung einreichen:
+
+```sh
+gh variable set PLAY_RELEASE_STATUS --repo $REPO --body draft
+```
+
+Nach der ersten Freigabe die Variable löschen (`gh variable delete PLAY_RELEASE_STATUS --repo
+$REPO`); danach veröffentlicht die CI jede Version direkt im Track.
+
 Ab jetzt lädt jedes Release den Build in den geschlossenen Test. Scheitert ein Upload,
 lässt er sich unter *Actions → Play upload → Run workflow* mit der Versionsnummer wiederholen.
