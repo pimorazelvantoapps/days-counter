@@ -1,7 +1,7 @@
 # Play Store einrichten
 
 Einmalige Schritte, damit die CI jede neue Version signiert in den **geschlossenen Test**
-(Track `alpha`) hochlädt. Bis Schritt 7 erledigt ist, überspringt die CI den Upload; Tags und
+(Track `alpha`) hochlädt, auf Wunsch zusätzlich in den internen Test (siehe Schritt 7). Bis Schritt 7 erledigt ist, überspringt die CI den Upload; Tags und
 GitHub-Releases entstehen wie bisher.
 
 Reihenfolge einhalten: Die Play Developer API kann keine App anlegen, die erste Version muss
@@ -142,5 +142,13 @@ gh variable set PLAY_RELEASE_STATUS --repo $REPO --body draft
 Nach der ersten Freigabe die Variable löschen (`gh variable delete PLAY_RELEASE_STATUS --repo
 $REPO`); danach veröffentlicht die CI jede Version direkt im Track.
 
-Ab jetzt lädt jedes Release den Build in den geschlossenen Test. Scheitert ein Upload,
+Die Ziel-Tracks bestimmt die Variable `PLAY_TRACKS` (kommagetrennt, ohne sie nur `alpha`).
+Der interne Test braucht keine Prüfung durch Google und steht nach wenigen Minuten bereit,
+zählt aber nicht für die 12 Tester über 14 Tage; deshalb beide Tracks bedienen:
+
+```sh
+gh variable set PLAY_TRACKS --repo $REPO --body internal,alpha
+```
+
+Ab jetzt lädt jedes Release den Build in die gewählten Tracks. Scheitert ein Upload,
 lässt er sich unter *Actions → Play upload → Run workflow* mit der Versionsnummer wiederholen.

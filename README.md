@@ -66,7 +66,8 @@ ein GitHub-Release mit Änderungsübersicht. Dafür folgt jede Commit-Nachricht
 
 Lokale Builds tragen die Version `0.0.0-dev`.
 
-Jede neue Version geht signiert in den geschlossenen Test im Google Play Store; die
+Jede neue Version geht signiert in den geschlossenen Test im Google Play Store, auf Wunsch
+zusätzlich in den internen Test; die
 Freigabe für alle Nutzer erfolgt von Hand in der Play Console. Einrichtung:
 [`docs/play-store-setup.md`](docs/play-store-setup.md). Datenschutz:
 [`PRIVACY.md`](PRIVACY.md).
