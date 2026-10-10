@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -48,6 +49,25 @@ class AlarmManagerMidnightUpdateSchedulerTest {
     }
 
     @Test
+    fun `on the 23-hour day clocks go forward in Berlin the alarm targets the following midnight`() {
+        assertNextMidnight(LocalDate.of(2026, 3, 29), zone, Instant.parse("2026-03-29T22:00:00Z"))
+    }
+
+    @Test
+    fun `on the 25-hour day clocks go back in Berlin the alarm targets the following midnight`() {
+        assertNextMidnight(LocalDate.of(2026, 10, 25), zone, Instant.parse("2026-10-25T23:00:00Z"))
+    }
+
+    @Test
+    fun `when the next midnight is skipped in Santiago the alarm targets the first hour of that day`() {
+        assertNextMidnight(
+            LocalDate.of(2026, 9, 5),
+            ZoneId.of("America/Santiago"),
+            Instant.parse("2026-09-06T04:00:00Z"),
+        )
+    }
+
+    @Test
     fun `rescheduling replaces instead of duplicating`() {
         scheduler.schedule()
         scheduler.schedule()
@@ -74,6 +94,16 @@ class AlarmManagerMidnightUpdateSchedulerTest {
         val intent = shadowOf(operation).savedIntent
         assertEquals(DateChangeReceiver.ACTION_MIDNIGHT, intent.action)
         assertEquals(DateChangeReceiver::class.java.name, intent.component?.className)
+    }
+
+    private fun assertNextMidnight(
+        day: LocalDate,
+        dayZone: ZoneId,
+        expected: Instant,
+    ) {
+        AlarmManagerMidnightUpdateScheduler(context, alarmManager, ControlledClock(day, dayZone)).schedule()
+
+        assertEquals(expected.toEpochMilli(), shadowOf(alarmManager).scheduledAlarms.single().triggerAtMs)
     }
 
     private companion object {
