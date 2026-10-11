@@ -64,7 +64,8 @@ ein GitHub-Release mit Änderungsübersicht. Dafür folgt jede Commit-Nachricht
 | `feat!: …` oder Footer `BREAKING CHANGE:` | neue Major-Version (1.2.0 → 2.0.0) |
 | `docs`, `test`, `build` (ohne Scope `deps`), `ci`, `refactor`, `chore` | kein Release |
 
-Lokale Builds tragen die Version `0.0.0-dev`.
+Die Version steht in `version.properties`; semantic-release aktualisiert sie in einem
+Release-Commit, lokale Builds tragen daher die zuletzt veröffentlichte Version.
 
 Jede neue Version geht signiert in den geschlossenen Test im Google Play Store, auf Wunsch
 zusätzlich in den internen Test; die
