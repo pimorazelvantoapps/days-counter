@@ -53,6 +53,12 @@ README und Store-Beschreibung nicht verschwiegen. Der Upload-Schlüssel wird bew
 wiederverwendet: Für den Verteilungsschlüssel gibt es keinen Reset, ein Leck des Upload-Schlüssels
 soll die F-Droid-Nutzer nicht treffen.
 
+Die Bestätigung für Android-Entwickler kennt den Paketnamen schon über die Play-App, aber nur mit
+Googles App-Signaturschlüssel. Den Verteilungsschlüssel tragen wir dort zusätzlich ein, bevor das
+erste APK erscheint; sonst verweigern zertifizierte Geräte in den betroffenen Ländern die
+Installation. Das gelingt nur, weil F-Droid unsere Signatur übernimmt: Einen von F-Droid selbst
+signierten Build könnten wir nicht registrieren.
+
 ## 4. Version im Repo
 
 `version.properties` im Wurzelverzeichnis ist die einzige Quelle für `versionName` und
@@ -161,6 +167,7 @@ in der Anleitung.
 
 `docs/fdroid-setup.md` beschreibt die einmaligen Schritte: Verteilungsschlüssel in `~/.keys`
 erzeugen und sichern, Secrets anlegen, Deploy-Key erzeugen und eintragen, Ruleset-Ausnahme,
+Verteilungsschlüssel in der Play Console für die Bestätigung für Android-Entwickler registrieren,
 Zertifikats-Fingerabdruck ins Rezept, Anträge stellen.
 
 ## 10. Tests und Verifikation
