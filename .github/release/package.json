@@ -1,0 +1,10 @@
+{
+  "name": "days-counter-release",
+  "private": true,
+  "description": "Pins semantic-release and its plugins with a lockfile, so a release runs the same code each time and Dependabot can update it.",
+  "devDependencies": {
+    "@semantic-release/exec": "7.1.0",
+    "conventional-changelog-conventionalcommits": "9.3.1",
+    "semantic-release": "25.0.9"
+  }
+}
