@@ -67,20 +67,34 @@ Fehlermeldung nennt dann das Ruleset, die Ursache ist aber der Deploy-Key.
 
 ## 4. Ruleset-Ausnahme für Deploy-Keys
 
-Das Ruleset `main` auslesen, Deploy-Keys als Ausnahme eintragen und zurückschreiben:
+Das Ruleset des Branches `main` heißt `main`. Auslesen, Deploy-Keys als Ausnahme eintragen und
+zurückschreiben:
 
 ```sh
 RULESET_ID=$(gh api repos/$REPO/rulesets --jq '.[] | select(.name=="main") | .id')
+[ -n "$RULESET_ID" ] || { echo "Ruleset main nicht gefunden" >&2; false; }
 gh api repos/$REPO/rulesets/$RULESET_ID \
   | jq '{name, target, enforcement, conditions, rules,
          bypass_actors: ((.bypass_actors // []) + [{"actor_type":"DeployKey","bypass_mode":"always"}])}' \
   | gh api -X PUT repos/$REPO/rulesets/$RULESET_ID --input -
+gh api repos/$REPO/rulesets/$RULESET_ID --jq '.bypass_actors'   # muss den Eintrag enthalten
 ```
 
-Danach prüfen, dass `bypass_actors` den Eintrag enthält:
+Nur nötig, falls das optionale Ruleset `release tags` aus
+[`play-store-setup.md`](play-store-setup.md), Schritt 2, eingerichtet wurde: semantic-release
+pusht die Tags per SSH als Deploy-Key, das Ruleset würde sie sonst abweisen. Dieselbe Ausnahme
+dort eintragen:
 
 ```sh
-gh api repos/$REPO/rulesets/$RULESET_ID --jq '.bypass_actors'
+TAG_RULESET_ID=$(gh api repos/$REPO/rulesets --jq '.[] | select(.name=="release tags") | .id')
+if [ -n "$TAG_RULESET_ID" ]; then
+  gh api repos/$REPO/rulesets/$TAG_RULESET_ID \
+    | jq '{name, target, enforcement, conditions, rules,
+           bypass_actors: ((.bypass_actors // []) + [{"actor_type":"DeployKey","bypass_mode":"always"}])}' \
+    | gh api -X PUT repos/$REPO/rulesets/$TAG_RULESET_ID --input -
+else
+  echo "Kein Ruleset 'release tags' vorhanden, nichts zu tun"
+fi
 ```
 
 ## 5. Bestätigung für Android-Entwickler
@@ -90,17 +104,27 @@ registrierten Entwicklern stammen. Ohne Registrierung verweigern diese Geräte d
 der APKs aus GitHub, IzzyOnDroid und F-Droid. Registrierbar ist der Verteilungsschlüssel nur,
 solange F-Droid unsere Signatur übernimmt, deshalb vor dem ersten APK-Release:
 
-1. SHA-256 des Zertifikats ausgeben (siehe Schritt 6).
-2. In der Play Console den Verteilungsschlüssel zur App `$PACKAGE` hinzufügen.
+1. SHA-256 des Zertifikats ausgeben; die Play Console erwartet die Form mit Doppelpunkten in
+   Großbuchstaben, wie `keytool` sie ausgibt:
+
+   ```sh
+   keytool -list -v -keystore ~/.keys/days-counter-distribution.jks -alias distribution | grep SHA256
+   ```
+
+2. In der Play Console den Verteilungsschlüssel zur App `com.pimorazelvanto.dayscounter`
+   hinzufügen.
 3. Den Besitznachweis nach Anleitung der Console erbringen.
 
 ## 6. Fingerabdruck für das F-Droid-Rezept
 
+`AllowedAPKSigningKeys` verlangt den Fingerabdruck in Kleinbuchstaben ohne Doppelpunkte:
+
 ```sh
-keytool -list -v -keystore ~/.keys/days-counter-distribution.jks -alias distribution | grep SHA256
+keytool -list -v -keystore ~/.keys/days-counter-distribution.jks -alias distribution \
+  | sed -n 's/.*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f'
 ```
 
-Doppelpunkte entfernen, in Kleinbuchstaben umwandeln und in `AllowedAPKSigningKeys` des Rezepts
+Ergebnis in das Rezept
 [`fdroid/com.pimorazelvanto.dayscounter.yml`](fdroid/com.pimorazelvanto.dayscounter.yml)
 eintragen. Beim Einreichen außerdem `versionName`, `versionCode`, `commit` und
 `CurrentVersion*` auf das dann aktuelle Release setzen; `commit` ist der Tag des Release-Commits.
