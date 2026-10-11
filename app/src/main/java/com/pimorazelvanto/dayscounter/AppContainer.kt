@@ -3,12 +3,10 @@ package com.pimorazelvanto.dayscounter
 import android.app.AlarmManager
 import android.content.Context
 import android.util.Log
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.pimorazelvanto.dayscounter.data.DataStoreWidgetConfigRepository
 import com.pimorazelvanto.dayscounter.data.WidgetConfigRepository
+import com.pimorazelvanto.dayscounter.data.widgetConfigDataStore
 import com.pimorazelvanto.dayscounter.domain.Clock
 import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.domain.SystemClock
@@ -47,19 +45,9 @@ class DefaultAppContainer(
 
     override val clock: Clock = SystemClock()
 
-    /**
-     * An unreadable store file is replaced by an empty one instead of making every read throw:
-     * the app has no launcher icon, so a widget that can only crash would leave clearing the
-     * app data in the system settings as the sole way back. Every widget falls back to its
-     * placeholder and can be configured again.
-     */
     override val repository: WidgetConfigRepository =
         DataStoreWidgetConfigRepository(
-            PreferenceDataStoreFactory.create(
-                corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-            ) {
-                applicationContext.preferencesDataStoreFile("widget_configs")
-            },
+            widgetConfigDataStore { applicationContext.preferencesDataStoreFile("widget_configs") },
         )
 
     override val widgetUpdater: WidgetUpdater = GlanceWidgetUpdater(applicationContext)
