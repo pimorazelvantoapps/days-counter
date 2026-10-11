@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The day count as a plain view; see widget_title_text.xml for why it is not a Glance Text. -->
+<!-- The day count as a plain view; WidgetTextViews.kt sizes it and says why. -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_text"
     android:layout_width="match_parent"

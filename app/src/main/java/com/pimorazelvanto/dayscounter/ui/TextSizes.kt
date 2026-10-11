@@ -11,8 +11,7 @@ import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
  * plain view XML and cannot read Kotlin, so it keeps its own copy of the sizes it needs in
  * `dimens.xml`.
  *
- * The sizes are in dp, not sp: the widget is a fixed 1x1 cell, and text that grew with the
- * system font size cut the title short and replaced the day count with an ellipsis.
+ * In dp rather than sp; `widget/WidgetTextViews.kt` explains why.
  */
 object TextSizes {
     val TITLE = 10.dp
