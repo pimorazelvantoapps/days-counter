@@ -8,6 +8,7 @@ import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.MidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.domain.WidgetConfig
 import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
+import com.pimorazelvanto.dayscounter.domain.takeVisible
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +42,7 @@ class ConfigViewModel(
     }
 
     fun onTitleChanged(title: String) {
-        mutableUiState.update { it.copy(title = title.take(MAX_TITLE_LENGTH)) }
+        mutableUiState.update { it.copy(title = title.takeVisible(MAX_TITLE_LENGTH)) }
     }
 
     fun onTargetDateChanged(targetDate: LocalDate) {
