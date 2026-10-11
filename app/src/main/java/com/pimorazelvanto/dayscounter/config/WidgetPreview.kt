@@ -14,10 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
@@ -64,7 +67,8 @@ fun WidgetPreview(
             Text(
                 text = state.title,
                 color = colorResource(R.color.widget_header_text),
-                fontSize = TextSizes.TITLE,
+                fontSize = TextSizes.TITLE.toFixedSp(),
+                lineHeight = TextSizes.TITLE.toFixedSp(),
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -79,10 +83,19 @@ fun WidgetPreview(
             Text(
                 text = state.valueText,
                 color = colorResource(textColor),
-                fontSize = TextSizes.value(state.sizeTier),
+                fontSize = TextSizes.value(state.sizeTier).toFixedSp(),
+                lineHeight = TextSizes.value(state.sizeTier).toFixedSp(),
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
             )
         }
     }
 }
+
+/**
+ * The widget's dp text size as sp that cancels out the system font size, like the widget itself.
+ * Also used as the line height: the theme's own line height would otherwise exceed the 18dp
+ * header and, centred within it, push the title out of sight once the font size is enlarged.
+ */
+@Composable
+private fun Dp.toFixedSp(): TextUnit = with(LocalDensity.current) { toSp() }

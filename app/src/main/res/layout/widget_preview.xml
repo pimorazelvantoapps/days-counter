@@ -10,14 +10,17 @@
                                                      the two-digit @string/widget_preview_value
 
      Overdraw: this layout is only ever inflated as an app-widget preview, never under an
-     activity theme, so the theme background lint infers is never actually painted. -->
+     activity theme, so the theme background lint infers is never actually painted.
+
+     SpUsage: the text sizes are dp on purpose, like the widget itself; the 1x1 cell cannot grow
+     with the system font size (see ui/TextSizes.kt). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/widget_sheet_background"
     android:orientation="vertical"
-    tools:ignore="Overdraw">
+    tools:ignore="Overdraw,SpUsage">
 
     <TextView
         android:layout_width="match_parent"

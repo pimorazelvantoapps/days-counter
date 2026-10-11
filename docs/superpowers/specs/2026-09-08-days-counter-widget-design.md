@@ -131,15 +131,20 @@ unten eine ganze Stufe - und der Titel trägt die Bedeutung („Bis Urlaub“ vs
 
 | Ziffern | Stufe | Größe |
 |---|---|---|
-| 1, „0“, Platzhalter „–“ | `ONE_DIGIT` | 26sp |
-| 2 | `TWO_DIGITS` | 21sp |
-| 3 | `THREE_DIGITS` | 17sp |
-| 4 | `FOUR_DIGITS` | 14sp |
-| 5 und mehr | `FIVE_OR_MORE_DIGITS` | 11sp |
+| 1, „0“, Platzhalter „–“ | `ONE_DIGIT` | 26dp |
+| 2 | `TWO_DIGITS` | 21dp |
+| 3 | `THREE_DIGITS` | 17dp |
+| 4 | `FOUR_DIGITS` | 14dp |
+| 5 und mehr | `FIVE_OR_MORE_DIGITS` | 11dp |
 
 Die Größen liegen gebündelt in `ui.TextSizes` (Abschnitt 4), geteilt von Glance-Blatt und
 Compose-Vorschau. Die statische Launcher-Vorschau (`res/layout/widget_preview.xml`) kann
 kein Kotlin lesen und führt ihre eigene Kopie der beiden Größen, die sie braucht.
+
+Die Größen sind in dp, nicht in sp, und wachsen deshalb nicht mit der Schriftgröße des Systems:
+Das 1x1-Feld ist fest, bei 200 % Schrift schnitt der Launcher den Titel ab und ersetzte die Zahl
+durch „…“. Weil Glance-`Text` nur sp kennt, rendern Titel und Zahl als eingebettete Views
+(`widget/WidgetTextViews.kt`).
 
 ### Zieldatum
 
