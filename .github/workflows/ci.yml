@@ -182,3 +182,16 @@ jobs:
     with:
       version: ${{ needs.release.outputs.version }}
     secrets: inherit
+
+  # Signed with the distribution key that GitHub, IzzyOnDroid and F-Droid share
+  # (docs/fdroid-setup.md); skipped until that key exists.
+  apk:
+    name: apk
+    needs: release
+    if: needs.release.outputs.version != '' && vars.DISTRIBUTION_KEY_CONFIGURED == 'true'
+    permissions:
+      contents: write
+    uses: ./.github/workflows/apk-release.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+    secrets: inherit

@@ -33,8 +33,8 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   Nutzer wählen, nicht nach dem Umfang der Änderung.
 - Keine Merge-Commits: Branches vor dem Merge auf `main` rebasen. Die CI prüft jeden einzelnen
   Commit eines PRs, weil jeder einzeln auf `main` landet.
-- Version nie von Hand in `app/build.gradle.kts` setzen. semantic-release übergibt sie beim
-  Release als `-PappVersion`.
+- Version nie von Hand setzen: `version.properties` schreibt der Release-Bot im Release-Commit;
+  Gradle liest sie von dort.
 - Store-Texte, -Bilder und „Neuerungen“ nur unter `fastlane/metadata/android/` ändern.
   `changelogs/<versionCode>.txt` und `version.properties` schreibt ausschließlich der Release-Bot.
 

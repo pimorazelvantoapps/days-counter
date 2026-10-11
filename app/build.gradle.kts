@@ -5,13 +5,10 @@ plugins {
     alias(libs.plugins.ktlint)
 }
 
-// -PappVersion takes precedence only until semantic-release writes version.properties in the
-// release commit; see docs/superpowers/specs/2026-10-11-fdroid-distribution-design.md.
 val appVersion: AppVersion =
-    providers.gradleProperty("appVersion").orNull?.let(AppVersion::fromSemanticVersion)
-        ?: AppVersion.parseProperties(
-            providers.fileContents(rootProject.layout.projectDirectory.file("version.properties")).asText.get(),
-        )
+    AppVersion.parseProperties(
+        providers.fileContents(rootProject.layout.projectDirectory.file("version.properties")).asText.get(),
+    )
 
 /**
  * Keystore that signs the release build: the Play upload key for the bundle, the distribution key
