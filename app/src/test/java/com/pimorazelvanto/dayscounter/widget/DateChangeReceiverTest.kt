@@ -57,6 +57,15 @@ class DateChangeReceiverTest {
     }
 
     @Test
+    fun `a failing widget update still schedules the next midnight`() {
+        container.widgetUpdater.failOnUpdate = true
+
+        receiver.onReceive(application, Intent(DateChangeReceiver.ACTION_MIDNIGHT))
+
+        assertEquals(1, container.midnightUpdateScheduler.scheduleCount)
+    }
+
+    @Test
     fun `unrelated action is ignored`() {
         receiver.onReceive(application, Intent(Intent.ACTION_BATTERY_LOW))
 
