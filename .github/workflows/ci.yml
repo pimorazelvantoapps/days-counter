@@ -6,8 +6,10 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Pull requests cancel their older runs. On main each run is its own group, so a newer merge can
+  # cancel the older run's checks (job groups below) without ever touching a release in progress.
+  group: ${{ github.event_name == 'pull_request' && format('{0}-{1}', github.workflow, github.ref) || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -25,6 +27,9 @@ jobs:
 
   check:
     name: check
+    concurrency:
+      group: checks-${{ github.ref }}-check
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -54,6 +59,9 @@ jobs:
   # edge-to-edge and test tooling differs most.
   emulator:
     name: emulator (API ${{ matrix.api-level }})
+    concurrency:
+      group: checks-${{ github.ref }}-emulator-${{ matrix.api-level }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -130,7 +138,7 @@ jobs:
   # The branch rules require a check named "connected"; it passes only if every emulator run did.
   connected:
     name: connected
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.emulator.result != 'cancelled' }}
     needs: emulator
     runs-on: ubuntu-latest
     steps:
@@ -140,6 +148,10 @@ jobs:
     name: release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [check, connected]
+    # Never cancelled: a release that has started must finish its commit, tag and GitHub release.
+    concurrency:
+      group: release-main
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       contents: write
