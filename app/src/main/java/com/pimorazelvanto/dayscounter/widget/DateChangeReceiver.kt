@@ -18,7 +18,13 @@ class DateChangeReceiver : BroadcastReceiver() {
             try {
                 container.clock.dateChanged()
                 container.widgetUpdater.updateAll()
-                container.midnightUpdateScheduler.schedule()
+                // Boot, update and time changes arrive whether or not a widget is placed; without
+                // one, a new alarm would wake the device every night and keep renewing itself.
+                if (container.widgetUpdater.hasWidgets()) {
+                    container.midnightUpdateScheduler.schedule()
+                } else {
+                    container.midnightUpdateScheduler.cancel()
+                }
             } finally {
                 pendingResult?.finish()
             }

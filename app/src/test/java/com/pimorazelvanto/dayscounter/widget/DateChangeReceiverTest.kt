@@ -47,6 +47,16 @@ class DateChangeReceiverTest {
     }
 
     @Test
+    fun `without widgets every handled action cancels the alarm instead of scheduling it`() {
+        container.widgetUpdater.widgetCount = 0
+
+        DateChangeReceiver.HANDLED_ACTIONS.forEach { receiver.onReceive(application, Intent(it)) }
+
+        assertEquals(0, container.midnightUpdateScheduler.scheduleCount)
+        assertEquals(DateChangeReceiver.HANDLED_ACTIONS.size, container.midnightUpdateScheduler.cancelCount)
+    }
+
+    @Test
     fun `unrelated action is ignored`() {
         receiver.onReceive(application, Intent(Intent.ACTION_BATTERY_LOW))
 
