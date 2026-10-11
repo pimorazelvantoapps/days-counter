@@ -23,3 +23,5 @@ Open Source
 Der Quellcode ist unter der MIT-Lizenz auf GitHub verfügbar: github.com/pimorazelvantoapps/days-counter
 
 Hinweis: Days Counter ist ein reines Widget. Nach der Installation findest du es in der Widget-Auswahl deines Startbildschirms, nicht in der App-Übersicht.
+
+Updates: Die APKs von GitHub, IzzyOnDroid und F-Droid tragen eine gemeinsame Signatur, die sich von der aus Google Play unterscheidet; ein Wechsel zwischen Google Play und diesen Quellen erfordert eine Neuinstallation.
