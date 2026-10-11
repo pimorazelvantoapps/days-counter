@@ -38,10 +38,10 @@ jobs:
       - name: Refuse a tag that is not on main
         run: git merge-base --is-ancestor "v$VERSION" origin/main
 
-      # F-Droid builds the version written in the tagged release commit; a bundle of another version
-      # would never match its rebuild.
+      # The bundle's versionCode comes from version.properties; Play rejects a mismatching or
+      # duplicate versionCode, so the file must belong to the version being uploaded.
       - name: Refuse a tag whose version.properties does not match
-        run: grep -qx "versionName=$VERSION" version.properties
+        run: grep -qxF "versionName=$VERSION" version.properties
 
       - uses: ./.github/actions/setup-android-build
 

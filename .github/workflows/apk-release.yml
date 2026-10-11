@@ -1,7 +1,8 @@
 name: APK release
 
-# Called by the release job for every new version. Run it by hand to attach the APK to a release
-# whose run failed after the tag was created.
+# Called by the release job for every new version. Run it by hand to attach the APK to an existing
+# GitHub release, e.g. when the apk job failed; it cannot recover a release whose GitHub release
+# object was never created.
 on:
   workflow_call:
     inputs:
@@ -39,7 +40,7 @@ jobs:
       # F-Droid builds the version written in the tagged release commit; an APK of another version
       # would never match its rebuild.
       - name: Refuse a tag whose version.properties does not match
-        run: grep -qx "versionName=$VERSION" version.properties
+        run: grep -qxF "versionName=$VERSION" version.properties
 
       - uses: ./.github/actions/setup-android-build
 
