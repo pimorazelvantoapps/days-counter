@@ -26,6 +26,16 @@ class ConfigUiStateTest {
     }
 
     @Test
+    fun `without date the placeholder preview already shows the typed title`() {
+        assertEquals("Urlaub", base.preview.title)
+    }
+
+    @Test
+    fun `without date and with a blank title the placeholder preview shows the default title`() {
+        assertEquals("Tage", base.copy(title = " ").preview.title)
+    }
+
+    @Test
     fun `future date is valid and preview shows remaining days`() {
         val state = base.copy(targetDate = today.plusDays(3))
 
