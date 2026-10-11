@@ -189,11 +189,12 @@ das Löschen der App-Daten in den Systemeinstellungen als Ausweg.
 ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand. Gelesen wird als
 Strom (`observe`), der bei jeder Änderung erneut liefert; `load` ist dessen erster Wert.
 
-Beim Entfernen eines Widgets (`DaysCounterWidget.onDelete`, innerhalb des Broadcasts, den Glance
-für das Entfernen offenhält) löscht das Repository die drei Schlüssel. Wird das
-letzte Widget entfernt, wird der Mitternachtsalarm in `onDisabled` abgemeldet; das System ruft
-diesen Rückruf genau dann auf, sodass `AppWidgetManager` nicht nach übrigen Widgets befragt
-werden muss.
+Beim Entfernen eines Widgets (`DaysCounterWidget.onDelete`, solange Glance das Entfernen
+offenhält) löscht das Repository die drei Schlüssel. Wird das letzte Widget entfernt, meldet
+`onDisabled` den Mitternachtsalarm ab; das System ruft diesen Rückruf genau dann auf. Die
+Broadcasts für Neustart, Update und Zeitänderung kommen dagegen auch ohne Widget an, deshalb
+fragt `DateChangeReceiver` den `AppWidgetManager`, ob noch Widgets existieren (Abschnitt
+„Zeitänderungen“).
 
 ## 7. Aktualisierung
 
@@ -349,9 +350,10 @@ Vollständige Abdeckung von `domain`:
 - `MidnightUpdateScheduler`: genau ein Alarm ab nächster Mitternacht in Gerätezeitzone mit
   zehn Minuten Fenster, Neuplanung ersetzt, Abmelden entfernt (`ShadowAlarmManager`).
 - Manifest: keine Berechtigung für exakte Alarme, auch nicht über Bibliotheken.
-- `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst
-  Update und Neuplanung aus; die behandelten Aktionen und die Intent-Filter des Manifests
-  stimmen in beiden Richtungen überein.
+- `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst ein
+  Update aus; mit Widgets plant er den Alarm neu, ohne Widgets meldet er ihn ab, und ein
+  fehlschlagendes Update verhindert die Neuplanung nicht. Die behandelten Aktionen und die
+  Intent-Filter des Manifests stimmen in beiden Richtungen überein.
 - `DaysCounterWidgetReceiver`: `onEnabled` plant den Alarm, `onDisabled` meldet ihn ab.
 - `DaysCounterWidget.onDelete` löscht die Konfiguration des entfernten Widgets.
 - Glance-Layout mit `glance-testing`: Titel und Zahl für gegebene Konfiguration;
