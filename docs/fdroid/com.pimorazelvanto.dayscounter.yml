@@ -1,0 +1,29 @@
+Categories:
+  - Time
+License: MIT
+AuthorName: Pimora Zelvanto Apps
+SourceCode: https://github.com/pimorazelvantoapps/days-counter
+IssueTracker: https://github.com/pimorazelvantoapps/days-counter/issues
+Changelog: https://github.com/pimorazelvantoapps/days-counter/releases
+
+AutoName: Days Counter
+
+RepoType: git
+Repo: https://github.com/pimorazelvantoapps/days-counter.git
+Binaries: https://github.com/pimorazelvantoapps/days-counter/releases/download/v%v/days-counter-%v.apk
+
+Builds:
+  - versionName: 1.0.7
+    versionCode: 1000007
+    commit: v1.0.7
+    subdir: app
+    gradle:
+      - yes
+
+AllowedAPKSigningKeys: <SHA-256 des Verteilungszertifikats, Kleinbuchstaben ohne Doppelpunkte>
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: version.properties|versionCode=(\d+)|.|versionName=(.+)
+CurrentVersion: 1.0.7
+CurrentVersionCode: 1000007
