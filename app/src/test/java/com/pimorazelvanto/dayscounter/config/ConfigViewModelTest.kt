@@ -105,6 +105,16 @@ class ConfigViewModelTest {
     }
 
     @Test
+    fun `emoji as twentieth character is kept whole`() {
+        val vm = viewModel()
+        val title = "a".repeat(19) + "🌴"
+
+        vm.onTitleChanged(title + "b")
+
+        assertEquals(title, vm.uiState.value.title)
+    }
+
+    @Test
     fun `save persists, updates widgets and schedules alarm`() {
         val vm = viewModel()
         vm.onTitleChanged("Urlaub")

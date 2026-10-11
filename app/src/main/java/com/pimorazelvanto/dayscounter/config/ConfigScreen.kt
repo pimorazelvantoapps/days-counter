@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.pimorazelvanto.dayscounter.R
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
+import com.pimorazelvanto.dayscounter.domain.visibleLength
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -179,7 +180,13 @@ private fun TitleField(
         onValueChange = onTitleChanged,
         label = { Text(stringResource(R.string.config_label_title)) },
         supportingText = {
-            Text(stringResource(R.string.config_title_length, state.title.length, ConfigViewModel.MAX_TITLE_LENGTH))
+            Text(
+                stringResource(
+                    R.string.config_title_length,
+                    state.title.visibleLength(),
+                    ConfigViewModel.MAX_TITLE_LENGTH,
+                ),
+            )
         },
         singleLine = true,
         modifier = Modifier.fillMaxWidth().testTag(ConfigTestTags.TITLE_FIELD),
