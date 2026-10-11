@@ -30,6 +30,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: v${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The environment's branch policy only checks the ref the run was started from, not the tag
+      # that is built and signed here; tags themselves can be pushed by anyone with write access.
+      - name: Refuse a tag that is not on main
+        run: git merge-base --is-ancestor "v$VERSION" origin/main
+
       - uses: ./.github/actions/setup-android-build
 
       - name: Decode upload keystore
@@ -46,6 +54,11 @@ jobs:
           UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
           UPLOAD_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
         run: ./gradlew bundleRelease -PappVersion="$VERSION" --no-configuration-cache
+
+      # The upload steps below are third-party code and need only the bundle.
+      - name: Remove upload keystore
+        if: ${{ always() }}
+        run: rm -f "$RUNNER_TEMP/upload.jks"
 
       - id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
