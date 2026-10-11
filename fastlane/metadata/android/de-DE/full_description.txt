@@ -1,0 +1,25 @@
+Wie viele Tage noch bis zum Urlaub? Seit wann seid ihr zusammen? Days Counter zeigt es dir auf einen Blick – als kleines Widget direkt auf deinem Startbildschirm.
+
+So funktioniert's
+• Widget „Days Counter“ auf den Startbildschirm ziehen
+• Titel eingeben, Datum wählen, Farbe aussuchen – fertig
+• Ein Tipp auf das Widget öffnet die Einstellungen erneut
+
+Funktionen
+• Countdown oder Zähler: Liegt das Datum in der Zukunft, zeigt das Widget die verbleibenden Tage, am Zieltag eine 0, danach die vergangenen Tage
+• Beliebig viele Widgets, jedes mit eigenem Titel, Datum und einer von 12 Farben
+• Kompaktes 1×1-Format im Stil eines Kalenderblatts
+• Aktualisiert sich automatisch kurz nach Mitternacht sowie bei Zeitzonen- oder Zeitänderung
+• Passt sich dem hellen oder dunklen Design deines Geräts an
+• Auf Deutsch und Englisch
+
+Ideal für
+Urlaub, Geburtstag, Hochzeit, Jahrestag, Prüfung, Umzug, Renteneintritt, rauchfrei seit … – oder jedes andere Datum, das dir wichtig ist.
+
+Privatsphäre
+Days Counter sammelt keine Daten. Die App hat keinen Internetzugriff, enthält keine Werbung, kein Tracking und braucht kein Konto. Deine Einträge bleiben ausschließlich auf deinem Gerät.
+
+Open Source
+Der Quellcode ist unter der MIT-Lizenz auf GitHub verfügbar: github.com/pimorazelvantoapps/days-counter
+
+Hinweis: Days Counter ist ein reines Widget. Nach der Installation findest du es in der Widget-Auswahl deines Startbildschirms, nicht in der App-Übersicht.
