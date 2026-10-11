@@ -146,9 +146,13 @@ jobs:
     outputs:
       version: ${{ steps.semantic-release.outputs.version }}
     steps:
+      # The deploy key is the only actor the main ruleset lets push directly; semantic-release uses
+      # it to push the release commit that carries version.properties.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+      - uses: ./.github/actions/setup-android-build
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: lts/*
@@ -160,6 +164,10 @@ jobs:
         id: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: .github/release/node_modules/.bin/semantic-release
 
   # Uploads only once Google Cloud is set up for this repository (docs/play-store-setup.md).
