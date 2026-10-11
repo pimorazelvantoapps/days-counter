@@ -138,7 +138,8 @@ jobs:
   # The branch rules require a check named "connected"; it passes only if every emulator run did.
   connected:
     name: connected
-    if: ${{ !cancelled() && needs.emulator.result != 'cancelled' }}
+    # Only on main a cancelled emulator leg (superseded) skips this job; on pull requests it fails the required check.
+    if: ${{ !cancelled() && !(github.event_name == 'push' && needs.emulator.result == 'cancelled') }}
     needs: emulator
     runs-on: ubuntu-latest
     steps:
