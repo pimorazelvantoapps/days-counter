@@ -189,7 +189,8 @@ das Löschen der App-Daten in den Systemeinstellungen als Ausweg.
 ein Wert nicht parsebar ist. `null` führt im Widget zum Platzhalter-Zustand. Gelesen wird als
 Strom (`observe`), der bei jeder Änderung erneut liefert; `load` ist dessen erster Wert.
 
-Beim Entfernen eines Widgets (`onDeleted`) löscht das Repository die drei Schlüssel. Wird das
+Beim Entfernen eines Widgets (`DaysCounterWidget.onDelete`, innerhalb des Broadcasts, den Glance
+für das Entfernen offenhält) löscht das Repository die drei Schlüssel. Wird das
 letzte Widget entfernt, wird der Mitternachtsalarm in `onDisabled` abgemeldet; das System ruft
 diesen Rückruf genau dann auf, sodass `AppWidgetManager` nicht nach übrigen Widgets befragt
 werden muss.
@@ -351,8 +352,8 @@ Vollständige Abdeckung von `domain`:
 - `DateChangeReceiver`: jeder behandelte Broadcast meldet die Datumsänderung und löst
   Update und Neuplanung aus; die behandelten Aktionen und die Intent-Filter des Manifests
   stimmen in beiden Richtungen überein.
-- `DaysCounterWidgetReceiver`: `onEnabled` plant den Alarm, `onDisabled` meldet ihn ab,
-  `onDeleted` löscht die Konfiguration der entfernten Widgets.
+- `DaysCounterWidgetReceiver`: `onEnabled` plant den Alarm, `onDisabled` meldet ihn ab.
+- `DaysCounterWidget.onDelete` löscht die Konfiguration des entfernten Widgets.
 - Glance-Layout mit `glance-testing`: Titel und Zahl für gegebene Konfiguration;
   Platzhalter-Zustand. Die Header-Farbe bleibt ungeprüft, weil die Unit-Test-Umgebung von
   Glance keinen Farb-Matcher anbietet.
