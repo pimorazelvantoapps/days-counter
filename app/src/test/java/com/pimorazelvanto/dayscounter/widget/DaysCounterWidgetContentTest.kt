@@ -2,10 +2,7 @@ package com.pimorazelvanto.dayscounter.widget
 
 import android.content.Context
 import android.content.Intent
-import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.ExperimentalGlanceRemoteViewsApi
@@ -18,6 +15,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.pimorazelvanto.dayscounter.domain.DigitSizeTier
 import com.pimorazelvanto.dayscounter.domain.HeaderColor
 import com.pimorazelvanto.dayscounter.domain.WidgetUiState
+import com.pimorazelvanto.dayscounter.testsupport.texts
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -76,14 +74,6 @@ class DaysCounterWidgetContentTest {
                     DaysCounterWidgetContent(state, onClick = anyClick)
                 }
             }.remoteViews
-        return buildList { collectTexts(remoteViews.apply(context, FrameLayout(context)), this) }
-    }
-
-    private fun collectTexts(
-        view: View,
-        into: MutableList<String>,
-    ) {
-        if (view is TextView) into += view.text.toString()
-        if (view is ViewGroup) (0 until view.childCount).forEach { collectTexts(view.getChildAt(it), into) }
+        return remoteViews.apply(context, FrameLayout(context)).texts()
     }
 }

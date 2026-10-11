@@ -1,10 +1,7 @@
 package com.pimorazelvanto.dayscounter.widget
 
 import android.content.Context
-import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.ExperimentalGlanceApi
@@ -27,6 +24,7 @@ import com.pimorazelvanto.dayscounter.domain.WidgetUiState
 import com.pimorazelvanto.dayscounter.testsupport.ControlledClock
 import com.pimorazelvanto.dayscounter.testsupport.FakeAppContainer
 import com.pimorazelvanto.dayscounter.testsupport.FakeWidgetConfigRepository
+import com.pimorazelvanto.dayscounter.testsupport.texts
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.runBlocking
@@ -124,21 +122,11 @@ class DaysCounterWidgetRenderTest {
     private fun observedAppWidgetId(): Int = requireNotNull(repository.observedAppWidgetId)
 
     private fun inflateTexts(remoteViews: android.widget.RemoteViews): List<String> {
-        val texts = mutableListOf<String>()
+        var texts = emptyList<String>()
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val parent = FrameLayout(context)
-            val view = remoteViews.apply(context, parent)
-            collectTexts(view, texts)
+            texts = remoteViews.apply(context, FrameLayout(context)).texts()
         }
         return texts
-    }
-
-    private fun collectTexts(
-        view: View,
-        into: MutableList<String>,
-    ) {
-        if (view is TextView) into += view.text.toString()
-        if (view is ViewGroup) (0 until view.childCount).forEach { collectTexts(view.getChildAt(it), into) }
     }
 
     private companion object {
