@@ -12,6 +12,7 @@ Kotlin, minSdk 33, compileSdk/targetSdk 37, Jetpack Glance (Widget), Jetpack Com
 
 ```
 ./gradlew check            # Lint, ktlint, detekt, Unit- und Robolectric-Tests
+./gradlew -p buildSrc test   # Tests der Build-Logik in buildSrc; `check` führt sie nicht aus
 ./gradlew connectedCheck   # Instrumentierte Tests auf laufendem Emulator
 ./gradlew assembleStaging && scripts/smoke-test-minified.sh   # Minifizierten Build auf Emulator prüfen
 ./gradlew assembleDebug    # APK für Sideload
