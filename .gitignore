@@ -13,3 +13,7 @@
 *.aab
 /app/release
 /.github/release/node_modules
+*.jks
+*.keystore
+*.p12
+*.pem
