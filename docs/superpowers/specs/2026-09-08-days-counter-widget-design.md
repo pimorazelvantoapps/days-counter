@@ -206,7 +206,8 @@ Ruhemodus steht im Docblock von `AlarmManagerMidnightUpdateScheduler.schedule`.
 `setAlarmClock` wird nicht verwendet, weil es ein Wecker-Symbol in der Statusleiste
 einblendet.
 
-Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant wird:
+Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant wird, solange
+mindestens ein Widget existiert:
 
 - nach jedem Feuern
 - beim Speichern einer Konfiguration
@@ -217,7 +218,9 @@ Planung ist idempotent (gleicher PendingIntent, Neuplanung ersetzt). Neu geplant
 
 `DateChangeReceiver` reagiert auf den Alarm sowie `TIMEZONE_CHANGED`, `TIME_CHANGED`,
 `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`. In allen Fällen: dem `Clock` die Datumsänderung
-melden, alle Widgets aktualisieren und den Alarm neu planen. Diese Broadcasts sind von den
+melden, alle Widgets aktualisieren und den Alarm neu planen, oder ihn abmelden, wenn kein
+Widget mehr existiert: Diese Broadcasts kommen auch ohne Widget an, und ein neu geplanter Alarm
+würde das Gerät sonst jede Nacht wecken und sich selbst erneuern. Diese Broadcasts sind von den
 Implicit-Broadcast-Beschränkungen ausgenommen und werden im Manifest registriert. Für
 `BOOT_COMPLETED` wird `RECEIVE_BOOT_COMPLETED` deklariert.
 
