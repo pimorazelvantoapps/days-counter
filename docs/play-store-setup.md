@@ -47,6 +47,28 @@ gh secret set UPLOAD_KEY_ALIAS --env play-store --repo $REPO --body upload
 gh secret set UPLOAD_KEY_PASSWORD --env play-store --repo $REPO       # fragt nach dem Wert
 ```
 
+Die Branch-Policy prüft nur den Ref, von dem ein Lauf startet, nicht den Tag, den der Upload-Job
+baut und signiert. Der Job bricht deshalb ab, wenn der Tag kein Vorfahre von `main` ist. Optional
+verhindert zusätzlich ein Ruleset, dass jemand außer Admins und der CI Versions-Tags anlegt,
+verschiebt oder löscht (15368 ist die App „GitHub Actions“, mit deren Token semantic-release die
+Tags anlegt; nach dem ersten Release danach prüfen, dass der Tag entstanden ist):
+
+```sh
+gh api -X POST repos/$REPO/rulesets --input - <<'JSON'
+{
+  "name": "release tags",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": { "ref_name": { "include": ["refs/tags/v*"], "exclude": [] } },
+  "rules": [{ "type": "creation" }, { "type": "update" }, { "type": "deletion" }],
+  "bypass_actors": [
+    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" },
+    { "actor_id": 15368, "actor_type": "Integration", "bypass_mode": "always" }
+  ]
+}
+JSON
+```
+
 ## 3. App in der Play Console anlegen
 
 1. *App erstellen*: Name „Days Counter“, Standardsprache Englisch (USA), App, kostenlos.
@@ -88,7 +110,9 @@ nur in CI, Dokumentation und eben der Signatur.
 ## 5. Google Cloud: Workload Identity Federation
 
 Die CI meldet sich ohne gespeicherten Schlüssel an: GitHub stellt pro Lauf ein Token aus,
-Google tauscht es nur für dieses Repository gegen kurzlebige Zugangsdaten.
+Google tauscht es nur für Läufe dieses Repositorys gegen kurzlebige Zugangsdaten, die im
+Environment `play-store` auf `main` laufen. Geprüft wird die unveränderliche Repository-ID, nicht
+der Name, der sich umbenennen und danach neu vergeben lässt.
 
 ```sh
 PROJECT_ID=days-counter-ci        # weltweit eindeutig wählen
@@ -97,6 +121,7 @@ gcloud config set project $PROJECT_ID
 gcloud services enable androidpublisher.googleapis.com iam.googleapis.com \
   iamcredentials.googleapis.com sts.googleapis.com
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+REPO_ID=$(gh api repos/$REPO --jq .id)
 
 gcloud iam service-accounts create play-upload --display-name="Play upload from GitHub Actions"
 SERVICE_ACCOUNT=play-upload@$PROJECT_ID.iam.gserviceaccount.com
@@ -106,10 +131,26 @@ gcloud iam workload-identity-pools create github --location=global \
 gcloud iam workload-identity-pools providers create-oidc days-counter --location=global \
   --workload-identity-pool=github \
   --issuer-uri=https://token.actions.githubusercontent.com \
-  --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository \
-  --attribute-condition="assertion.repository == '$REPO'"
+  --attribute-mapping=google.subject=assertion.sub,attribute.repository_id=assertion.repository_id \
+  --attribute-condition="assertion.repository_id == '$REPO_ID' && assertion.environment == 'play-store' && assertion.ref == 'refs/heads/main'"
 
 gcloud iam service-accounts add-iam-policy-binding $SERVICE_ACCOUNT \
+  --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository_id/$REPO_ID"
+```
+
+Ein früher eingerichteter Provider, der nur den Repository-Namen prüft, wird so nachgezogen
+(dieselben Variablen wie oben):
+
+```sh
+gcloud iam workload-identity-pools providers update-oidc days-counter --location=global \
+  --workload-identity-pool=github \
+  --attribute-mapping=google.subject=assertion.sub,attribute.repository_id=assertion.repository_id \
+  --attribute-condition="assertion.repository_id == '$REPO_ID' && assertion.environment == 'play-store' && assertion.ref == 'refs/heads/main'"
+gcloud iam service-accounts add-iam-policy-binding $SERVICE_ACCOUNT \
+  --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository_id/$REPO_ID"
+gcloud iam service-accounts remove-iam-policy-binding $SERVICE_ACCOUNT \
   --role=roles/iam.workloadIdentityUser \
   --member="principalSet://iam.googleapis.com/projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/github/attribute.repository/$REPO"
 ```
