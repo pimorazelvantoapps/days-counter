@@ -37,6 +37,8 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   Gradle liest sie von dort.
 - Store-Texte, -Bilder und „Neuerungen“ nur unter `fastlane/metadata/android/` ändern.
   `changelogs/<versionCode>.txt` und `version.properties` schreibt ausschließlich der Release-Bot.
+- Nach jedem Release liegt ein Commit `chore(release): X.Y.Z [skip ci]` des Bots auf `main`;
+  Branches vor dem Merge darauf rebasen.
 
 ## Code
 

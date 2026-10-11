@@ -73,6 +73,11 @@ Freigabe für alle Nutzer erfolgt von Hand in der Play Console. Einrichtung:
 [`docs/play-store-setup.md`](docs/play-store-setup.md). Datenschutz:
 [`PRIVACY.md`](PRIVACY.md).
 
+Außerhalb des Play Stores gibt es die App bei IzzyOnDroid und F-Droid sowie als APK an jedem
+GitHub-Release. Diese drei teilen sich eine eigene Signatur und lassen sich untereinander
+aktualisieren; Installationen aus dem Play Store tragen Googles Signatur, ein Wechsel erfordert
+eine Neuinstallation. Einrichtung: [`docs/fdroid-setup.md`](docs/fdroid-setup.md).
+
 ## Lizenz
 
 MIT, siehe [`LICENSE`](LICENSE).
