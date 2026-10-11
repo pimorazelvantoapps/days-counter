@@ -16,15 +16,16 @@ class DateChangeReceiver : BroadcastReceiver() {
         val pendingResult: PendingResult? = goAsync()
         container.backgroundScope.launch {
             try {
-                container.clock.dateChanged()
-                container.widgetUpdater.updateAll()
                 // Boot, update and time changes arrive whether or not a widget is placed; without
                 // one, a new alarm would wake the device every night and keep renewing itself.
+                // Decided before the update, so a failing update cannot break the nightly chain.
                 if (container.widgetUpdater.hasWidgets()) {
                     container.midnightUpdateScheduler.schedule()
                 } else {
                     container.midnightUpdateScheduler.cancel()
                 }
+                container.clock.dateChanged()
+                container.widgetUpdater.updateAll()
             } finally {
                 pendingResult?.finish()
             }
