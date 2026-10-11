@@ -1,0 +1,25 @@
+How many days until your vacation? How long since you met? Days Counter shows you at a glance – as a small widget right on your home screen.
+
+How it works
+• Drag the "Days Counter" widget onto your home screen
+• Enter a title, pick a date, choose a color – done
+• Tap the widget to change its settings at any time
+
+Features
+• Countdown or count-up: for a future date the widget shows the days left, 0 on the day itself, and the days elapsed afterwards
+• As many widgets as you like, each with its own title, date and one of 12 colors
+• Compact 1×1 size, styled like a calendar page
+• Updates automatically shortly after midnight and when the time zone or time changes
+• Follows your device's light or dark theme
+• Available in English and German
+
+Perfect for
+Vacations, birthdays, weddings, anniversaries, exams, moving day, retirement, smoke-free since … – or any other date that matters to you.
+
+Privacy
+Days Counter collects no data. The app has no internet access, no ads, no tracking and needs no account. Your entries stay on your device only.
+
+Open source
+The source code is available on GitHub under the MIT license: github.com/pimorazelvantoapps/days-counter
+
+Note: Days Counter is a widget only. After installing, you'll find it in your home screen's widget picker, not in the app drawer.

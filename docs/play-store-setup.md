@@ -74,7 +74,7 @@ JSON
 1. *App erstellen*: Name „Days Counter“, Standardsprache Englisch (USA), App, kostenlos.
 2. *Store-Eintrag*: Kurz- und Langbeschreibung, Symbol 512×512, Funktionsgrafik 1024×500,
    mindestens zwei Screenshots. Übersetzung Deutsch hinzufügen: Die CI liefert die
-   „Neuerungen“ aus `distribution/whatsnew/` für `en-US` und `de-DE`.
+   „Neuerungen“ aus `fastlane/metadata/android/<sprache>/changelogs/default.txt` für `en-US` und `de-DE`.
 3. *App-Inhalte*: Datenschutzerklärung
    `https://github.com/pimorazelvantoapps/days-counter/blob/main/PRIVACY.md`;
    Datensicherheit „Es werden keine Nutzerdaten erhoben oder geteilt“; Einstufung des

@@ -60,6 +60,16 @@ jobs:
         if: ${{ always() }}
         run: rm -f "$RUNNER_TEMP/signing.jks"
 
+      # The upload action expects one whatsnew-<locale> file per language; fastlane holds them as
+      # changelogs/default.txt, shared with F-Droid and IzzyOnDroid.
+      - name: Prepare release notes
+        run: |
+          mkdir -p "$RUNNER_TEMP/whatsnew"
+          for dir in fastlane/metadata/android/*/; do
+            locale=$(basename "$dir")
+            cp "$dir/changelogs/default.txt" "$RUNNER_TEMP/whatsnew/whatsnew-$locale"
+          done
+
       - id: auth
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
@@ -77,5 +87,5 @@ jobs:
           # releases; the repository variable PLAY_RELEASE_STATUS=draft covers that period.
           status: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
           releaseName: v${{ inputs.version }}
-          whatsNewDirectory: distribution/whatsnew
+          whatsNewDirectory: ${{ runner.temp }}/whatsnew
           mappingFile: app/build/outputs/mapping/release/mapping.txt

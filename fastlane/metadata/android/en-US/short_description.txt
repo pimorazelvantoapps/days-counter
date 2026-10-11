@@ -1,0 +1,1 @@
+Countdown widget counting the days until or since any date. No ads, no tracking.

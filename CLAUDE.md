@@ -35,6 +35,8 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   Commit eines PRs, weil jeder einzeln auf `main` landet.
 - Version nie von Hand in `app/build.gradle.kts` setzen. semantic-release übergibt sie beim
   Release als `-PappVersion`.
+- Store-Texte, -Bilder und „Neuerungen“ nur unter `fastlane/metadata/android/` ändern.
+  `changelogs/<versionCode>.txt` und `version.properties` schreibt ausschließlich der Release-Bot.
 
 ## Code
 
