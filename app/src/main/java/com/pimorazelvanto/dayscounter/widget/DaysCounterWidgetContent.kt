@@ -79,7 +79,7 @@ private fun Header(state: WidgetUiState) {
     ) {
         AndroidRemoteViews(
             titleRemoteViews(LocalContext.current, state.title),
-            modifier = GlanceModifier.fillMaxWidth().semantics { testTag = "title" },
+            modifier = GlanceModifier.fillMaxWidth(),
         )
     }
 }
@@ -92,7 +92,7 @@ private fun ColumnScope.Sheet(state: WidgetUiState) {
     ) {
         AndroidRemoteViews(
             valueRemoteViews(LocalContext.current, state),
-            modifier = GlanceModifier.fillMaxWidth().semantics { testTag = "value" },
+            modifier = GlanceModifier.fillMaxWidth(),
         )
     }
 }
