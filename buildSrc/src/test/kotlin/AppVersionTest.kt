@@ -45,6 +45,12 @@ class AppVersionTest {
     }
 
     @Test
+    fun `properties text without version name is rejected`() {
+        val error = assertThrows<IllegalArgumentException> { AppVersion.parseProperties("versionCode=1000007\n") }
+        assertEquals("version.properties lacks versionName", error.message)
+    }
+
+    @Test
     fun `properties text without version code is rejected`() {
         val error = assertThrows<IllegalArgumentException> { AppVersion.parseProperties("versionName=1.0.7\n") }
         assertEquals("version.properties lacks versionCode", error.message)
