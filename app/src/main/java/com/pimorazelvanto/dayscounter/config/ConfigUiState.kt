@@ -31,6 +31,8 @@ data class ConfigUiState(
         WidgetUiState.from(
             config = targetDate?.let { WidgetConfig(effectiveTitle, it, color) },
             today = today,
-            defaultTitle = defaultTitle,
+            // The placeholder shown before a date is picked takes the typed title, so the
+            // preview follows the title field from the first keystroke.
+            defaultTitle = effectiveTitle,
         )
 }
