@@ -43,7 +43,7 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   `domain`, `data` und `ui`, aber nicht einander. Einzige Ausnahme: `widget` ruft
   `ConfigActivity.createIntent` auf, um den Tipp auf ein Widget an dessen Konfiguration zu
   binden.
-- `ui` enthält nur, was Compose's `TextUnit` braucht und deshalb nicht in `domain` darf
+- `ui` enthält nur, was Compose-Einheiten wie `Dp` braucht und deshalb nicht in `domain` darf
   (`domain` bleibt frei von Android-/Compose-Typen): aktuell `TextSizes`, geteilt vom
   Glance-Blatt in `widget` und seiner Compose-Vorschau in `config`.
 - `WidgetUpdater` und `MidnightUpdateScheduler` sind Schnittstellen in `domain` (wie `Clock`),
@@ -58,6 +58,9 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
 - In Glance nie `ColorProvider(@ColorRes Int)` verwenden. Die Funktion ist `@RestrictTo`, weil
   die Farbe im Prozess des Launchers statt der App aufgelöst werden kann, was den Dunkelmodus
   bricht. Stattdessen `ColorProvider(day, night)` oder das öffentliche `background(@ColorRes)`.
+- Text im Widget nicht als Glance-`Text` anlegen: Glance kennt nur sp, und im festen 1x1-Feld
+  wächst sp-Text mit der Systemschrift über den Rand. Stattdessen `widget/WidgetTextViews.kt`
+  (eingebettete Views mit Größe in dp).
 - Kein DI-Framework, Abhängigkeiten werden in `AppContainer` manuell konstruiert.
 - Lints `UnusedResources` ist ein Fehler: eine Ressource erst anlegen, wenn sie im selben
   Commit auch verwendet wird.

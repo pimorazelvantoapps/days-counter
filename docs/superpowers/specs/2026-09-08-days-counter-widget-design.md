@@ -87,7 +87,7 @@ com.pimorazelvanto.dayscounter
 │   └── DataStoreWidgetConfigRepository Implementierung, Preferences DataStore
 ├── ui/
 │   └── TextSizes                Titel- und Wertgrößen je DigitSizeTier, geteilt von `widget`
-│                                 und `config`; Compose-`TextUnit` gehört nicht in `domain`
+│                                 und `config`; Compose-`Dp` gehört nicht in `domain`
 ├── widget/
 │   ├── DaysCounterWidget                    GlanceAppWidget
 │   ├── DaysCounterWidgetReceiver            GlanceAppWidgetReceiver, Lifecycle
