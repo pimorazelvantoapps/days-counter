@@ -152,6 +152,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    // Compose's test rule pulls Espresso 3.5, which reflects on InputManager.getInstance, a method
+    // Android 16 removed: every Compose test would fail there before reaching the app.
+    androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
