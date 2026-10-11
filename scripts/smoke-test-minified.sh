@@ -31,9 +31,14 @@ screen() {
 }
 
 # Taps the centre of the first node matching an attribute pattern, such as 'text="Save"'.
+# Polls like the render check, because a dump right after a tap can miss the next screen.
 tap() {
-  local node left top right bottom
-  node=$(screen | grep -oE "$1[^>]*bounds=\"[^\"]+\"" | awk 'NR == 1') || true
+  local node="" left top right bottom
+  for _ in $(seq 1 10); do
+    node=$(screen | grep -oE "$1[^>]*bounds=\"[^\"]+\"" | awk 'NR == 1') || true
+    [ -n "$node" ] && break
+    sleep 1
+  done
   if [ -z "$node" ]; then
     echo "Smoke test found no node matching $1" >&2
     screen >&2 || true
@@ -67,6 +72,18 @@ if [ "$rendered" != true ]; then
   exit 1
 fi
 
+resumed() {
+  local top
+  top=$(adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity') || true
+  grep -q "$activity" <<< "$top"
+}
+
+# Otherwise "no longer resumed" below would also hold if the check could not see the activity.
+if ! resumed; then
+  echo "Configuration screen is not reported as the resumed activity" >&2
+  exit 1
+fi
+
 tap 'text="Target date"'
 tap 'content-desc="Switch to text input mode"'
 tap 'text="Date"'
@@ -76,7 +93,7 @@ tap 'text="Save"'
 
 finished=false
 for _ in $(seq 1 10); do
-  if ! adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep -q "$activity"; then
+  if ! resumed; then
     finished=true
     break
   fi
