@@ -14,7 +14,10 @@ updates:
           - com.android.*
 
   - package-ecosystem: github-actions
-    directory: /
+    # The root covers .github/workflows only; the composite action needs its own entry.
+    directories:
+      - /
+      - /.github/actions/setup-android-build
     schedule:
       interval: weekly
     commit-message:
