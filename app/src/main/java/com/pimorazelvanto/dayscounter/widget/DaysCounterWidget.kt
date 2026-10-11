@@ -45,4 +45,16 @@ class DaysCounterWidget : GlanceAppWidget() {
             DaysCounterWidgetContent(state, onClick = openConfig)
         }
     }
+
+    /**
+     * Runs inside the broadcast Glance keeps alive for a removed widget, so the settings are gone
+     * before the process may be stopped. Deleting them from the receiver's own `onDeleted` instead
+     * would need a second `goAsync`, which Glance has already taken.
+     */
+    override suspend fun onDelete(
+        context: Context,
+        glanceId: GlanceId,
+    ) {
+        context.appContainer.repository.delete(GlanceAppWidgetManager(context).getAppWidgetId(glanceId))
+    }
 }

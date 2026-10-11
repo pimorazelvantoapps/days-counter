@@ -34,8 +34,8 @@ class DefaultAppContainer(
     private val applicationContext = context.applicationContext
 
     /**
-     * Runs the receivers' work after their broadcast returns. A failure there, such as a full disk
-     * while a removed widget's settings are deleted, is logged instead of reaching the thread's
+     * Runs the date-change receiver's work after its broadcast returns. A failure there, such as a
+     * storage error while the widgets update, is logged instead of reaching the thread's
      * uncaught-exception handler, which would kill the process and every widget update with it.
      */
     override val backgroundScope: CoroutineScope =
