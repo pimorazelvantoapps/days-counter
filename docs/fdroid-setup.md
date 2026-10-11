@@ -3,10 +3,11 @@
 Einmalige Schritte, damit die CI an jedem GitHub-Release eine APK `days-counter-X.Y.Z.apk`
 anhängt, die mit einem eigenen Verteilungsschlüssel signiert ist. IzzyOnDroid übernimmt diese
 APK; F-Droid baut die App reproduzierbar selbst und veröffentlicht stattdessen unsere Signatur.
-Bis Schritt 2 erledigt ist, überspringt die CI den `apk`-Job; Tags und GitHub-Releases
-entstehen wie bisher.
-
-Schritte 1 bis 5 müssen erledigt sein, bevor das erste Release mit APK entsteht.
+Sobald der Pipeline-PR gemergt ist, braucht jedes Release die Schritte 3 und 4 (Deploy-Key und
+Ruleset-Ausnahme); sonst weist das Ruleset den Release-Commit ab und das Release schlägt fehl.
+Deshalb die Schritte 1 bis 5 vor dem Merge erledigen. Die erste Version mit Release-Commit und
+APK ist das erste `feat`/`fix`/`build(deps)`-Release nach dem Merge; deren Version gehört in
+das Rezept (Schritt 6).
 
 Variablen für die Befehle unten:
 
@@ -44,26 +45,38 @@ gh secret set DISTRIBUTION_KEY_ALIAS --env play-store --repo $REPO --body distri
 gh secret set DISTRIBUTION_KEY_PASSWORD --env play-store --repo $REPO       # fragt nach dem Wert
 ```
 
-Erst danach die Variable setzen, die den `apk`-Job der CI einschaltet:
-
-```sh
-gh variable set DISTRIBUTION_KEY_CONFIGURED --body true --repo $REPO
-```
+Bei PKCS12-Keystores (dem Standard von `keytool`) ist das Schlüsselpasswort gleich dem
+Keystore-Passwort; `DISTRIBUTION_KEY_PASSWORD` muss daher denselben Wert wie
+`DISTRIBUTION_KEYSTORE_PASSWORD` haben.
 
 ## 3. Deploy-Key für den Release-Commit
 
 Der Release-Bot pusht den Release-Commit (`version.properties`, Changelog) auf `main`. Das
 Ruleset von `main` lässt das nur einen Deploy-Key tun.
 
+Der Private Key liegt im Environment `release`, das ihn nur an Läufe von `main` herausgibt; ein
+Repository-Secret wäre aus dem Workflow jedes Branches lesbar und umginge so das Ruleset von
+`main`. Das Environment wie in [`play-store-setup.md`](play-store-setup.md), Schritt 2, anlegen:
+
 ```sh
+gh api -X PUT repos/$REPO/environments/release \
+  -F 'deployment_branch_policy[protected_branches]=false' \
+  -F 'deployment_branch_policy[custom_branch_policies]=true'
+gh api -X POST repos/$REPO/environments/release/deployment-branch-policies \
+  -f name=main -f type=branch
+
 ssh-keygen -t ed25519 -N "" -C days-counter-release -f ~/.keys/days-counter-release-deploy
 gh repo deploy-key add ~/.keys/days-counter-release-deploy.pub --allow-write --title release-bot --repo $REPO
-gh secret set RELEASE_DEPLOY_KEY --repo $REPO < ~/.keys/days-counter-release-deploy
+gh secret set RELEASE_DEPLOY_KEY --env release --repo $REPO < ~/.keys/days-counter-release-deploy
 ```
 
-Fehlt `RELEASE_DEPLOY_KEY` oder ist er falsch, fällt semantic-release auf einen Push über HTTPS
-mit dem GitHub-Token zurück, und das Ruleset von `main` weist den Release-Commit ab. Die
-Fehlermeldung nennt dann das Ruleset, die Ursache ist aber der Deploy-Key.
+Die Ruleset-Ausnahme `DeployKey` (Schritt 4) gilt für jeden Deploy-Key mit Schreibrecht; deshalb
+darf nur dieser eine Schreibrecht haben.
+
+Fehlt `RELEASE_DEPLOY_KEY`, nutzt der Checkout HTTPS mit dem GitHub-Token, und das Ruleset von
+`main` weist den Release-Commit ab; die Fehlermeldung nennt dann das Ruleset, die Ursache ist
+aber der fehlende Deploy-Key. Ist der Key falsch oder nicht berechtigt, scheitert schon der
+Fetch in `actions/checkout` oder die Push-Prüfung von semantic-release.
 
 ## 4. Ruleset-Ausnahme für Deploy-Keys
 
@@ -114,6 +127,12 @@ solange F-Droid unsere Signatur übernimmt, deshalb vor dem ersten APK-Release:
 2. In der Play Console den Verteilungsschlüssel zur App `com.pimorazelvanto.dayscounter`
    hinzufügen.
 3. Den Besitznachweis nach Anleitung der Console erbringen.
+4. Erst danach die Variable setzen, die den `apk`-Job der CI einschaltet und damit die
+   Veröffentlichung der APKs startet:
+
+   ```sh
+   gh variable set DISTRIBUTION_KEY_CONFIGURED --body true --repo $REPO
+   ```
 
 ## 6. Fingerabdruck für das F-Droid-Rezept
 
@@ -126,14 +145,17 @@ keytool -list -v -keystore ~/.keys/days-counter-distribution.jks -alias distribu
 
 Ergebnis in das Rezept
 [`fdroid/com.pimorazelvanto.dayscounter.yml`](fdroid/com.pimorazelvanto.dayscounter.yml)
-eintragen. Beim Einreichen außerdem `versionName`, `versionCode`, `commit` und
-`CurrentVersion*` auf das dann aktuelle Release setzen; `commit` ist der Tag des Release-Commits.
+eintragen. Beim Einreichen außerdem die Platzhalter `versionName`, `versionCode`, `commit` und
+`CurrentVersion*` füllen: mit der ersten Version, die einen Release-Commit und eine APK hat
+(das erste `feat`/`fix`/`build(deps)`-Release nach dem Merge der Pipeline); `commit` ist der Tag
+des Release-Commits.
 
 Optional lässt sich lokal prüfen, dass der Build reproduzierbar ist: `apksigcopier` verlangt
-`apksigner` aus den Build-Tools des Android SDK im `PATH`:
+`apksigner` aus den Build-Tools des Android SDK im `PATH`. Der Pfad ist ein Beispiel und hängt
+von Betriebssystem und installierten Build-Tools ab (das Projekt nutzt Build-Tools 37.0.0):
 
 ```sh
-export PATH="$HOME/Library/Android/sdk/build-tools/34.0.0:$PATH"
+export PATH="$HOME/Library/Android/sdk/build-tools/37.0.0:$PATH"
 ```
 
 ## 7. IzzyOnDroid
@@ -164,6 +186,8 @@ No trackers, no network permission.
 
 ## 9. Wechsel zwischen Quellen
 
-Installationen aus dem Play Store tragen Googles Signatur, Installationen aus F-Droid,
-IzzyOnDroid und von GitHub den Verteilungsschlüssel. Ein Wechsel zwischen beiden Gruppen
-erfordert eine Neuinstallation.
+Siehe den Abschnitt „Releases“ im [`README.md`](../README.md).
+
+Der Satz zum Signaturwechsel am Ende von `fastlane/metadata/android/*/full_description.txt`
+gehört nur in den Eintrag bei F-Droid und IzzyOnDroid; nicht in den Play-Console-Eintrag
+kopieren.

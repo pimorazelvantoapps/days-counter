@@ -50,8 +50,9 @@ gh secret set UPLOAD_KEY_PASSWORD --env play-store --repo $REPO       # fragt na
 Die Branch-Policy prüft nur den Ref, von dem ein Lauf startet, nicht den Tag, den der Upload-Job
 baut und signiert. Der Job bricht deshalb ab, wenn der Tag kein Vorfahre von `main` ist. Optional
 verhindert zusätzlich ein Ruleset, dass jemand außer Admins und der CI Versions-Tags anlegt,
-verschiebt oder löscht (15368 ist die App „GitHub Actions“, mit deren Token semantic-release die
-Tags anlegt; nach dem ersten Release danach prüfen, dass der Tag entstanden ist):
+verschiebt oder löscht (semantic-release pusht die Tags per SSH als Release-Deploy-Key, der dafür
+die Ausnahme `DeployKey` braucht, siehe [`fdroid-setup.md`](fdroid-setup.md), Schritt 4; 15368
+ist die App „GitHub Actions“; nach dem ersten Release prüfen, dass der Tag entstanden ist):
 
 ```sh
 gh api -X POST repos/$REPO/rulesets --input - <<'JSON'
@@ -63,7 +64,8 @@ gh api -X POST repos/$REPO/rulesets --input - <<'JSON'
   "rules": [{ "type": "creation" }, { "type": "update" }, { "type": "deletion" }],
   "bypass_actors": [
     { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" },
-    { "actor_id": 15368, "actor_type": "Integration", "bypass_mode": "always" }
+    { "actor_id": 15368, "actor_type": "Integration", "bypass_mode": "always" },
+    { "actor_type": "DeployKey", "bypass_mode": "always" }
   ]
 }
 JSON
