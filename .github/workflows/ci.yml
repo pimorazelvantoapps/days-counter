@@ -149,6 +149,8 @@ jobs:
     name: release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [check, connected]
+    # Holds RELEASE_DEPLOY_KEY, which the environment releases only to runs of main.
+    environment: release
     # Never cancelled: a release that has started must finish its commit, tag and GitHub release.
     concurrency:
       group: release-main
@@ -188,6 +190,10 @@ jobs:
     name: play
     needs: release
     if: needs.release.outputs.version != '' && vars.GCP_SERVICE_ACCOUNT != ''
+    # Concurrent Play edits can make one upload fail; never cancelled.
+    concurrency:
+      group: play-main
+      cancel-in-progress: false
     permissions:
       contents: read
       id-token: write
