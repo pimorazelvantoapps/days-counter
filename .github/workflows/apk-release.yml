@@ -1,0 +1,73 @@
+name: APK release
+
+# Called by the release job for every new version. Run it by hand to attach the APK to a release
+# whose run failed after the tag was created.
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Released version without the leading v, e.g. 1.2.3
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: apk
+    runs-on: ubuntu-latest
+    environment: play-store
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: v${{ inputs.version }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The environment's branch policy only checks the ref the run was started from, not the tag.
+      - name: Refuse a tag that is not on main
+        run: git merge-base --is-ancestor "v$VERSION" origin/main
+
+      # F-Droid builds the version written in the tagged release commit; an APK of another version
+      # would never match its rebuild.
+      - name: Refuse a tag whose version.properties does not match
+        run: grep -qx "versionName=$VERSION" version.properties
+
+      - uses: ./.github/actions/setup-android-build
+
+      - name: Decode distribution keystore
+        env:
+          DISTRIBUTION_KEYSTORE_BASE64: ${{ secrets.DISTRIBUTION_KEYSTORE_BASE64 }}
+        run: |
+          echo "$DISTRIBUTION_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing.jks"
+          echo "SIGNING_KEYSTORE_FILE=$RUNNER_TEMP/signing.jks" >> "$GITHUB_ENV"
+
+      # Without the configuration cache: it would store the key passwords on disk.
+      - name: Build signed APK
+        env:
+          SIGNING_KEYSTORE_PASSWORD: ${{ secrets.DISTRIBUTION_KEYSTORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.DISTRIBUTION_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.DISTRIBUTION_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-configuration-cache
+
+      - name: Remove distribution keystore
+        if: ${{ always() }}
+        run: rm -f "$RUNNER_TEMP/signing.jks"
+
+      - name: Check signing blocks for F-Droid
+        run: python3 -I scripts/check-apk-signing-blocks.py app/build/outputs/apk/release/app-release.apk
+
+      - name: Attach APK to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "days-counter-$VERSION.apk"
+          gh release upload "v$VERSION" "days-counter-$VERSION.apk" --clobber

@@ -94,7 +94,7 @@ read -rs -p "Keystore-Passwort: " SIGNING_KEYSTORE_PASSWORD; echo
 read -rs -p "Schlüssel-Passwort: " SIGNING_KEY_PASSWORD; echo
 SIGNING_KEYSTORE_FILE=~/.keys/days-counter-upload.jks SIGNING_KEY_ALIAS=upload \
   SIGNING_KEYSTORE_PASSWORD=$SIGNING_KEYSTORE_PASSWORD SIGNING_KEY_PASSWORD=$SIGNING_KEY_PASSWORD \
-  ./gradlew bundleRelease -PappVersion=$VERSION --no-configuration-cache
+  ./gradlew bundleRelease --no-configuration-cache
 git switch main
 ```
 
@@ -102,10 +102,8 @@ git switch main
 hochladen, `app/build/outputs/mapping/release/mapping.txt` als Deobfuskierungsdatei
 hinzufügen, Release zur Überprüfung einreichen.
 
-Erst Versionen nach `v1.0.2` enthalten die Signatur-Konfiguration. Ist `v1.0.2` noch die
-neueste Version, statt des Tags den aktuellen Stand von `main` mit `-PappVersion=1.0.2`
-bauen (also `git switch --detach v$VERSION` weglassen): Er unterscheidet sich von `v1.0.2`
-nur in CI, Dokumentation und eben der Signatur.
+Tags vor dem ersten Release-Commit enthalten keine passende `version.properties`; die erste
+Version von Hand nur ab einem Tag mit Release-Commit bauen.
 
 ## 5. Google Cloud: Workload Identity Federation
 

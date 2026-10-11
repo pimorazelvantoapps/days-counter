@@ -38,6 +38,11 @@ jobs:
       - name: Refuse a tag that is not on main
         run: git merge-base --is-ancestor "v$VERSION" origin/main
 
+      # F-Droid builds the version written in the tagged release commit; a bundle of another version
+      # would never match its rebuild.
+      - name: Refuse a tag whose version.properties does not match
+        run: grep -qx "versionName=$VERSION" version.properties
+
       - uses: ./.github/actions/setup-android-build
 
       - name: Decode upload keystore
@@ -53,7 +58,7 @@ jobs:
           SIGNING_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease -PappVersion="$VERSION" --no-configuration-cache
+        run: ./gradlew bundleRelease --no-configuration-cache
 
       # The upload steps below are third-party code and need only the bundle.
       - name: Remove upload keystore
