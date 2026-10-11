@@ -17,6 +17,7 @@ Kotlin, minSdk 33, compileSdk/targetSdk 37, Jetpack Glance (Widget), Jetpack Com
 ./gradlew assembleStaging && scripts/smoke-test-minified.sh   # Minifizierten Build auf Emulator prüfen
 ./gradlew assembleDebug    # APK für Sideload
 ./gradlew ktlintFormat     # Formatierung anwenden
+python3 -I scripts/check-apk-signing-blocks.py <apk>   # F-Droid-Scanner: kein „Dependency metadata“-Block
 ```
 
 Beide Prüfläufe immer aus dem Wurzelverzeichnis starten: detekt hängt am Wurzelprojekt,

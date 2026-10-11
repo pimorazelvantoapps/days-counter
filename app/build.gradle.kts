@@ -91,6 +91,19 @@ android {
     packaging {
         resources.excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
     }
+
+    // AGP would store the dependency list, encrypted for Google, in the APK signing block; F-Droid's
+    // scanner rejects that block, and the app does not need it.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+}
+
+// baseline.prof is not reliably reproducible across builds (F-Droid's Reproducible Builds guide);
+// for a widget the startup gain is negligible, a reproducible APK is not.
+tasks.configureEach {
+    if (name.contains("ArtProfile")) enabled = false
 }
 
 kotlin {
