@@ -12,3 +12,4 @@
 *.ap_
 *.aab
 /app/release
+/.github/release/node_modules
