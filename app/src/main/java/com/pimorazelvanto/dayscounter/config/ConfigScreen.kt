@@ -7,12 +7,17 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -82,7 +87,7 @@ internal fun ConfigScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(SCREEN_PADDING),
+            modifier = Modifier.scrollingAboveKeyboard(innerPadding).padding(SCREEN_PADDING),
             verticalArrangement = Arrangement.spacedBy(SECTION_SPACING),
         ) {
             WidgetPreview(
@@ -130,6 +135,19 @@ internal fun ConfigScreen(
         )
     }
 }
+
+/**
+ * Scrolls because the form is taller than a phone in landscape, and keeps clear of the keyboard
+ * because edge-to-edge no longer shrinks the window for it. The scaffold's padding is consumed
+ * first so the keyboard inset does not count the navigation bar twice.
+ */
+@Composable
+private fun Modifier.scrollingAboveKeyboard(scaffoldPadding: PaddingValues): Modifier =
+    fillMaxSize()
+        .padding(scaffoldPadding)
+        .consumeWindowInsets(scaffoldPadding)
+        .imePadding()
+        .verticalScroll(rememberScrollState())
 
 @Suppress("ParameterNaming") // Mirrors the ConfigViewModel method name, as in ConfigScreen above.
 @Composable
