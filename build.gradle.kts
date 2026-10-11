@@ -35,3 +35,13 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 tasks.check {
     dependsOn(tasks.named("detekt"))
 }
+
+// Called by semantic-release while it prepares a release; the release commit carries the file,
+// so F-Droid builds the same version from the tag.
+tasks.register("writeVersionProperties") {
+    val semanticVersion = providers.gradleProperty("appVersion")
+    val target = layout.projectDirectory.file("version.properties")
+    doLast {
+        target.asFile.writeText(AppVersion.fromSemanticVersion(semanticVersion.get()).toProperties())
+    }
+}
