@@ -48,7 +48,7 @@ jobs:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
-  # The oldest supported Android and the newest one the app targets, where behaviour such as
+  # The oldest supported Android and the newest available emulator image, where behaviour such as
   # edge-to-edge and test tooling differs most.
   emulator:
     name: emulator (API ${{ matrix.api-level }})
