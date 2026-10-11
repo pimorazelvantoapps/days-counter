@@ -12,8 +12,8 @@ import com.pimorazelvanto.dayscounter.ui.TextSizes
 // The widget palette. Literals rather than colour resources because the launcher process renders
 // the widget and may resolve a resource against its own configuration instead of ours, which gets
 // night mode silently wrong; setColorInt below picks day or night at the moment the launcher
-// applies the views. KEEP IN SYNC WITH @color/widget_header_text, @color/widget_sheet_text and
-// @color/widget_placeholder_text (plus their values-night overrides), which the two previews read.
+// applies the views. The resources the previews read instead are listed in the KEEP IN SYNC block
+// of DaysCounterWidgetContent.kt.
 internal const val HEADER_TEXT = 0xFFFFFFFF.toInt()
 internal const val SHEET_TEXT_DAY = 0xFF212121.toInt()
 internal const val SHEET_TEXT_NIGHT = 0xFFF5F5F5.toInt()
