@@ -2,6 +2,7 @@ package com.pimorazelvanto.dayscounter
 
 import android.app.AlarmManager
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.emptyPreferences
@@ -14,6 +15,7 @@ import com.pimorazelvanto.dayscounter.domain.SystemClock
 import com.pimorazelvanto.dayscounter.domain.WidgetUpdater
 import com.pimorazelvanto.dayscounter.widget.AlarmManagerMidnightUpdateScheduler
 import com.pimorazelvanto.dayscounter.widget.GlanceWidgetUpdater
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,7 +33,17 @@ class DefaultAppContainer(
 ) : AppContainer {
     private val applicationContext = context.applicationContext
 
-    override val backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * Runs the receivers' work after their broadcast returns. A failure there, such as a full disk
+     * while a removed widget's settings are deleted, is logged instead of reaching the thread's
+     * uncaught-exception handler, which would kill the process and every widget update with it.
+     */
+    override val backgroundScope: CoroutineScope =
+        CoroutineScope(
+            SupervisorJob() +
+                Dispatchers.Default +
+                CoroutineExceptionHandler { _, throwable -> Log.e(LOG_TAG, "Background work failed", throwable) },
+        )
 
     override val clock: Clock = SystemClock()
 
@@ -62,3 +74,5 @@ class DefaultAppContainer(
 
 val Context.appContainer: AppContainer
     get() = (applicationContext as DaysCounterApplication).container
+
+private const val LOG_TAG = "DaysCounter"
