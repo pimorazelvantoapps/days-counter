@@ -90,10 +90,10 @@ Die aktuelle Version lokal signiert bauen, ohne dass Passwörter in der Shell-Hi
 ```sh
 VERSION=$(git describe --tags --abbrev=0 | sed 's/^v//')
 git switch --detach v$VERSION
-read -rs -p "Keystore-Passwort: " UPLOAD_KEYSTORE_PASSWORD; echo
-read -rs -p "Schlüssel-Passwort: " UPLOAD_KEY_PASSWORD; echo
-UPLOAD_KEYSTORE_FILE=~/.keys/days-counter-upload.jks UPLOAD_KEY_ALIAS=upload \
-  UPLOAD_KEYSTORE_PASSWORD=$UPLOAD_KEYSTORE_PASSWORD UPLOAD_KEY_PASSWORD=$UPLOAD_KEY_PASSWORD \
+read -rs -p "Keystore-Passwort: " SIGNING_KEYSTORE_PASSWORD; echo
+read -rs -p "Schlüssel-Passwort: " SIGNING_KEY_PASSWORD; echo
+SIGNING_KEYSTORE_FILE=~/.keys/days-counter-upload.jks SIGNING_KEY_ALIAS=upload \
+  SIGNING_KEYSTORE_PASSWORD=$SIGNING_KEYSTORE_PASSWORD SIGNING_KEY_PASSWORD=$SIGNING_KEY_PASSWORD \
   ./gradlew bundleRelease -PappVersion=$VERSION --no-configuration-cache
 git switch main
 ```

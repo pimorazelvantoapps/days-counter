@@ -13,20 +13,24 @@ val appVersion: AppVersion =
             providers.fileContents(rootProject.layout.projectDirectory.file("version.properties")).asText.get(),
         )
 
-/** Path to the Play upload keystore; only CI's release job and manual uploads provide it. */
-val uploadKeystoreFile: String? = providers.environmentVariable("UPLOAD_KEYSTORE_FILE").orNull
+/**
+ * Keystore that signs the release build: the Play upload key for the bundle, the distribution key
+ * for the APK on GitHub, IzzyOnDroid and F-Droid. Without it the build stays unsigned, as F-Droid
+ * and pull requests build it.
+ */
+val signingKeystoreFile: String? = providers.environmentVariable("SIGNING_KEYSTORE_FILE").orNull
 
 android {
     namespace = "com.pimorazelvanto.dayscounter"
     compileSdk = 37
 
     signingConfigs {
-        if (uploadKeystoreFile != null) {
-            create("upload") {
-                storeFile = file(uploadKeystoreFile)
-                storePassword = providers.environmentVariable("UPLOAD_KEYSTORE_PASSWORD").get()
-                keyAlias = providers.environmentVariable("UPLOAD_KEY_ALIAS").get()
-                keyPassword = providers.environmentVariable("UPLOAD_KEY_PASSWORD").get()
+        if (signingKeystoreFile != null) {
+            create("release") {
+                storeFile = file(signingKeystoreFile)
+                storePassword = providers.environmentVariable("SIGNING_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").get()
             }
         }
     }
@@ -45,8 +49,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Without the upload key the release build stays unsigned, as in pull requests.
-            signingConfig = signingConfigs.findByName("upload")
+            signingConfig = signingConfigs.findByName("release")
         }
         // The release build signed with the debug key, so CI can install the exact minified app
         // for a smoke test.
