@@ -1,6 +1,7 @@
 package com.pimorazelvanto.dayscounter.widget
 
 import android.content.Context
+import android.text.TextUtils
 import android.widget.FrameLayout
 import android.widget.RemoteViews
 import android.widget.TextView
@@ -43,6 +44,13 @@ class WidgetTextViewsTest {
 
         assertEquals(SHEET_TEXT_DAY, dayColor)
         assertEquals(SHEET_TEXT_NIGHT, nightColor)
+    }
+
+    @Test
+    fun `a value too wide for the cell ends in an ellipsis instead of losing digits silently`() {
+        val value = inflate(valueRemoteViews(context, state))
+
+        assertEquals(TextUtils.TruncateAt.END, value.ellipsize)
     }
 
     @Test
