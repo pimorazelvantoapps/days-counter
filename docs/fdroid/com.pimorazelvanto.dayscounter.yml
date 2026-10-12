@@ -13,17 +13,17 @@ Repo: https://github.com/pimorazelvantoapps/days-counter.git
 Binaries: https://github.com/pimorazelvantoapps/days-counter/releases/download/v%v/days-counter-%v.apk
 
 Builds:
-  - versionName: <X.Y.Z: erste Version mit Release-Commit>
-    versionCode: <versionCode dazu>
-    commit: v<X.Y.Z>
+  - versionName: '<X.Y.Z, erste Version mit Release-Commit>'
+    versionCode: '<versionCode dazu>'
+    commit: 'v<X.Y.Z>'
     subdir: app
     gradle:
       - yes
 
-AllowedAPKSigningKeys: <SHA-256 des Verteilungszertifikats, Kleinbuchstaben ohne Doppelpunkte>
+AllowedAPKSigningKeys: '<SHA-256 des Verteilungszertifikats, Kleinbuchstaben ohne Doppelpunkte>'
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: version.properties|versionCode=(\d+)|.|versionName=(.+)
-CurrentVersion: <X.Y.Z>
-CurrentVersionCode: <versionCode dazu>
+CurrentVersion: '<X.Y.Z>'
+CurrentVersionCode: '<versionCode dazu>'

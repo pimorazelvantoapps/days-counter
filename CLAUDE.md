@@ -32,12 +32,11 @@ in detekt oder Lint nicht aufweichen, Baselines nicht befüllen.
   nächste Version (Tabelle im `README.md`, Abschnitt „Releases“), deshalb nach der Wirkung für
   Nutzer wählen, nicht nach dem Umfang der Änderung.
 - Keine Merge-Commits: Branches vor dem Merge auf `main` rebasen, auch auf den Commit
-  `chore(release): X.Y.Z [skip ci]` des Bots. Die CI prüft jeden einzelnen
-  Commit eines PRs, weil jeder einzeln auf `main` landet.
-- Version nie von Hand setzen: `version.properties` schreibt der Release-Bot im Release-Commit;
-  Gradle liest sie von dort.
+  `chore(release): X.Y.Z [skip ci]` des Bots. Die CI prüft jeden einzelnen Commit eines PRs,
+  weil jeder einzeln auf `main` landet.
+- Version nie von Hand setzen: `version.properties` und `changelogs/<versionCode>.txt` schreibt
+  ausschließlich der Release-Bot im Release-Commit; Gradle liest die Version von dort.
 - Store-Texte, -Bilder und „Neuerungen“ nur unter `fastlane/metadata/android/` ändern.
-  `changelogs/<versionCode>.txt` und `version.properties` schreibt ausschließlich der Release-Bot.
 
 ## Code
 
