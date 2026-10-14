@@ -150,13 +150,28 @@ eintragen. Beim Einreichen außerdem die Platzhalter `versionName`, `versionCode
 (das erste `feat`/`fix`/`build(deps)`-Release nach dem Merge der Pipeline); `commit` ist der Tag
 des Release-Commits.
 
-Optional lässt sich lokal prüfen, dass der Build reproduzierbar ist: `apksigcopier` verlangt
-`apksigner` aus den Build-Tools des Android SDK im `PATH`. Der Pfad ist ein Beispiel und hängt
-von Betriebssystem und installierten Build-Tools ab (das Projekt nutzt Build-Tools 37.0.0):
+Optional lässt sich vor dem Einreichen lokal prüfen, dass der Build reproduzierbar ist, also aus
+dem Tag dasselbe APK entsteht wie am GitHub-Release. `apksigcopier compare` verlangt `apksigner`
+aus den Build-Tools des Android SDK im `PATH`. Die Pfade sind Beispiele und hängen von
+Betriebssystem und installierten Build-Tools ab (das Projekt nutzt Build-Tools 37.0.0):
 
 ```sh
-export PATH="$HOME/Library/Android/sdk/build-tools/37.0.0:$PATH"
+pip install apksigcopier
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export PATH="$ANDROID_HOME/build-tools/37.0.0:$PATH"
+VERSION=1.0.9
+WORK=$(mktemp -d)
+
+git clone --branch v$VERSION https://github.com/$REPO.git "$WORK/src"
+(cd "$WORK/src" && env -u SIGNING_KEYSTORE_FILE ./gradlew assembleRelease)
+gh release download v$VERSION --repo $REPO --pattern "days-counter-$VERSION.apk" --dir "$WORK"
+apksigcopier compare --unsigned "$WORK/days-counter-$VERSION.apk" \
+  "$WORK/src/app/build/outputs/apk/release/app-release-unsigned.apk" && echo reproduzierbar
 ```
+
+Ohne `SIGNING_*` baut Gradle unsigniert wie F-Droid. `compare` überträgt die Signatur des
+Release-APKs auf das lokale und prüft sie. `--unsigned` ist nötig, weil das zweite APK unsigniert
+ist; ohne die Option bricht `compare` mit „Missing META-INF/MANIFEST.MF“ ab.
 
 ## 7. IzzyOnDroid
 
