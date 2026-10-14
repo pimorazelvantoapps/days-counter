@@ -20,7 +20,7 @@ Builds:
     gradle:
       - yes
 
-AllowedAPKSigningKeys: '<SHA-256 des Verteilungszertifikats, Kleinbuchstaben ohne Doppelpunkte>'
+AllowedAPKSigningKeys: 09ac5d0007a6fa23d076a7d62dd730273eab64dea1de99ed5c0fdf15b2beff7c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
