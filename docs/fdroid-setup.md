@@ -6,8 +6,8 @@ APK; F-Droid baut die App reproduzierbar selbst und veröffentlicht stattdessen 
 Sobald der Pipeline-PR gemergt ist, braucht jedes Release die Schritte 3 und 4 (Deploy-Key und
 Ruleset-Ausnahme); sonst weist das Ruleset den Release-Commit ab und das Release schlägt fehl.
 Deshalb die Schritte 1 bis 5 vor dem Merge erledigen. Die erste Version mit Release-Commit und
-APK ist das erste `feat`/`fix`/`build(deps)`-Release nach dem Merge; deren Version gehört in
-das Rezept (Schritt 6).
+APK ist 1.0.9; sie steht im Rezept, spätere Versionen findet F-Droid über `AutoUpdateMode`
+selbst.
 
 Variablen für die Befehle unten:
 
@@ -145,10 +145,8 @@ keytool -list -v -keystore ~/.keys/days-counter-distribution.jks -alias distribu
 
 Ergebnis in das Rezept
 [`fdroid/com.pimorazelvanto.dayscounter.yml`](fdroid/com.pimorazelvanto.dayscounter.yml)
-eintragen. Beim Einreichen außerdem die Platzhalter `versionName`, `versionCode`, `commit` und
-`CurrentVersion*` füllen: mit der ersten Version, die einen Release-Commit und eine APK hat
-(das erste `feat`/`fix`/`build(deps)`-Release nach dem Merge der Pipeline); `commit` ist der Tag
-des Release-Commits.
+eintragen. `versionName`, `versionCode`, `commit` und `CurrentVersion*` nennen 1.0.9, die erste
+Version mit Release-Commit und APK; `commit` ist der Tag des Release-Commits.
 
 Optional lässt sich vor dem Einreichen lokal prüfen, dass der Build reproduzierbar ist, also aus
 dem Tag dasselbe APK entsteht wie am GitHub-Release. `apksigcopier compare` verlangt `apksigner`
